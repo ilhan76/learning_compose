@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.kudashov.learning_compose.R
@@ -37,11 +38,11 @@ import com.kudashov.learning_compose.network.home.HomeApi
 import com.kudashov.learning_compose.network.home.HomeRepository
 import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
 
-@Composable
 @OptIn(ExperimentalFoundationApi::class)
+@Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
     Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
@@ -51,7 +52,9 @@ fun HomeScreen(
             modifier = modifier.padding(start = 32.dp, top = 32.dp),
             tint = MaterialTheme.colorScheme.onPrimary
         )
-        SearchBar()
+
+        SearchBar(modifier)
+
         LazyVerticalStaggeredGrid(
             modifier = modifier
                 .fillMaxSize()
@@ -75,7 +78,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun SearchBar() {
+fun SearchBar(modifier: Modifier) {
     var inputText by remember { mutableStateOf("") }
     TextField(
         value = inputText,
@@ -96,7 +99,7 @@ fun SearchBar() {
             disabledIndicatorColor = Color.Transparent
         ),
         singleLine = true,
-        modifier = Modifier
+        modifier = modifier
             .padding(24.dp)
             .fillMaxWidth()
             .heightIn(min = 40.dp),

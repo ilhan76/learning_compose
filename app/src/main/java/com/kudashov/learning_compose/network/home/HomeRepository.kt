@@ -3,8 +3,13 @@ package com.kudashov.learning_compose.network.home
 import com.kudashov.learning_compose.domain.PhotoItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class HomeRepository(private val api: HomeApi) {
+@Singleton
+class HomeRepository @Inject constructor(
+    private val api: HomeApi
+) {
 
     fun getListPhotos(
         pageNumber: Int = 1,
