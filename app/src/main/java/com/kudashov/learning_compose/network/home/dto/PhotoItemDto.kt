@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.network.i_main.dto
+package com.kudashov.learning_compose.network.home.dto
 
 import com.google.gson.annotations.SerializedName
 import com.kudashov.learning_compose.domain.PhotoItem

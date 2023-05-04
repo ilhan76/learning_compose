@@ -1,11 +1,11 @@
-package com.kudashov.learning_compose.network.i_main
+package com.kudashov.learning_compose.network.home
 
 import com.kudashov.learning_compose.network.BaseUrls
-import com.kudashov.learning_compose.network.i_main.dto.PhotoItemDto
+import com.kudashov.learning_compose.network.home.dto.PhotoItemDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface MainApi {
+interface HomeApi {
 
     @GET(BaseUrls.LIST_PHOTOS)
     suspend fun getImages(
