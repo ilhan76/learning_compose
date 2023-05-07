@@ -4,6 +4,8 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +13,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,12 +36,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.kudashov.learning_compose.R
-import com.kudashov.learning_compose.network.RetrofitClient
-import com.kudashov.learning_compose.network.home.HomeApi
-import com.kudashov.learning_compose.network.home.HomeRepository
+import com.kudashov.learning_compose.domain.PhotoItem
+import com.kudashov.learning_compose.screens.home.ui_data.TabData
+import com.kudashov.learning_compose.ui.style.ProjectTextStyle
 import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -55,24 +57,12 @@ fun HomeScreen(
 
         SearchBar(modifier)
 
-        LazyVerticalStaggeredGrid(
+        Box(
             modifier = modifier
-                .fillMaxSize()
-                .padding(top = 24.dp, start = 22.dp, end = 22.dp),
-            columns = StaggeredGridCells.Fixed(2),
+                .padding(top = 24.dp, start = 22.dp, end = 22.dp)
+                .fillMaxSize(),
         ) {
-            items(state.photos) { item ->
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(item.url)
-                            .size(coil.size.Size.ORIGINAL)
-                            .build(),
-                    ),
-                    contentDescription = "",
-                    modifier = modifier.padding(4.dp)
-                )
-            }
+            VerticalStaggeredRoundedGrid(modifier, state.photos)
         }
     }
 }
@@ -106,6 +96,73 @@ fun SearchBar(modifier: Modifier) {
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun VerticalStaggeredRoundedGrid(
+    modifier: Modifier,
+    list: List<PhotoItem>
+) {
+    LazyVerticalStaggeredGrid(
+        modifier = modifier.fillMaxSize(),
+        columns = StaggeredGridCells.Fixed(2),
+    ) {
+        itemsIndexed(list) { index, item ->
+            Card(
+                modifier = modifier.padding(4.dp),
+                shape = RoundedCornerShape(
+                    topStart = if (index == 0) 8.dp else 0.dp,
+                    topEnd = if (index == 1) 8.dp else 0.dp,
+                    bottomStart = 0.dp,
+                    bottomEnd = 0.dp
+                )
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(item.url)
+                            .size(coil.size.Size.ORIGINAL)
+                            .build(),
+                    ),
+                    contentDescription = ""
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TabBarItem(
+    modifier: Modifier = Modifier,
+    onTabClicked: (String) -> Unit = {},
+    tabData: TabData
+) {
+    Box(
+        modifier = modifier.clickable {
+            onTabClicked(tabData.id)
+        }
+    ) {
+        tabData.hint?.let {
+            Text(
+                text = it,
+                style = ProjectTextStyle.RegularText10Hint
+            )
+        }
+        Text(
+            text = tabData.title,
+            modifier = modifier.padding(top = 16.dp, bottom = 12.dp),
+            style = if (tabData.isNewFeature) ProjectTextStyle.RegularText18Green else ProjectTextStyle.RegularText18Black
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TestPreview() {
+    LearningComposeTheme {
+        TabBarItem(tabData = TabData("123", true, "Bka bla", "Qweqwe"))
+    }
+}
+
 @Preview(
     showBackground = true,
     widthDp = 320,
@@ -113,31 +170,8 @@ fun SearchBar(modifier: Modifier) {
     name = "DefaultPreviewDark"
 )
 @Composable
-fun DefaultPreviewDark() {
-    LearningComposeTheme {
-        HomeScreen(
-            viewModel = HomeViewModel(
-                HomeRepository(
-                    RetrofitClient.getClient().create(HomeApi::class.java)
-                )
-            )
-        )
-    }
-}
+fun DefaultPreviewDark() = LearningComposeTheme { HomeScreen() }
 
-@Preview(
-    showBackground = true,
-    widthDp = 320
-)
+@Preview(showBackground = true, widthDp = 320)
 @Composable
-fun DefaultPreview() {
-    LearningComposeTheme {
-        HomeScreen(
-            viewModel = HomeViewModel(
-                HomeRepository(
-                    RetrofitClient.getClient().create(HomeApi::class.java)
-                )
-            )
-        )
-    }
-}
+fun DefaultPreview() = LearningComposeTheme { HomeScreen() }
