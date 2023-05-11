@@ -2,20 +2,20 @@ package com.kudashov.learning_compose.screens.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,15 +26,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
+import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.domain.PhotoItem
 import com.kudashov.learning_compose.screens.home.ui_data.TabData
@@ -46,7 +50,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val state = viewModel.state.value
     Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
         Icon(
             painter = painterResource(id = R.drawable.surf_logo),
@@ -57,13 +60,10 @@ fun HomeScreen(
 
         SearchBar(modifier)
 
-        Box(
-            modifier = modifier
-                .padding(top = 24.dp, start = 22.dp, end = 22.dp)
-                .fillMaxSize(),
-        ) {
-            VerticalStaggeredRoundedGrid(modifier, state.photos)
-        }
+        VerticalStaggeredRoundedGrid(
+            modifier = modifier,
+            photos = viewModel.getPhotos().collectAsLazyPagingItems()
+        )
     }
 }
 
@@ -100,31 +100,52 @@ fun SearchBar(modifier: Modifier) {
 @Composable
 fun VerticalStaggeredRoundedGrid(
     modifier: Modifier,
-    list: List<PhotoItem>
+    photos: LazyPagingItems<PhotoItem>
 ) {
-    LazyVerticalStaggeredGrid(
-        modifier = modifier.fillMaxSize(),
-        columns = StaggeredGridCells.Fixed(2),
+    Box(
+        modifier = modifier
+            .padding(top = 24.dp, start = 22.dp, end = 22.dp)
+            .fillMaxSize()
     ) {
-        itemsIndexed(list) { index, item ->
-            Card(
-                modifier = modifier.padding(4.dp),
-                shape = RoundedCornerShape(
-                    topStart = if (index == 0) 8.dp else 0.dp,
-                    topEnd = if (index == 1) 8.dp else 0.dp,
-                    bottomStart = 0.dp,
-                    bottomEnd = 0.dp
-                )
+        if (photos.loadState.refresh is LoadState.Loading) {
+            // todo Add shimmers
+            CircularProgressIndicator(
+                modifier = modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center),
+            )
+        } else {
+            LazyVerticalStaggeredGrid(
+                modifier = modifier.fillMaxSize(),
+                columns = StaggeredGridCells.Fixed(2),
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(item.url)
-                            .size(coil.size.Size.ORIGINAL)
-                            .build(),
-                    ),
-                    contentDescription = ""
-                )
+                items(
+                    count = photos.itemCount,
+                    key = photos.itemKey(),
+                    contentType = photos.itemContentType(
+                    )
+                ) { index ->
+                    val item = photos[index]
+                    Card(
+                        modifier = modifier.padding(4.dp),
+                        shape = RoundedCornerShape(
+                            topStart = if (index == 0) 8.dp else 0.dp,
+                            topEnd = if (index == 1) 8.dp else 0.dp,
+                            bottomStart = 0.dp,
+                            bottomEnd = 0.dp
+                        )
+                    ) {
+                        AsyncImage(model = item?.url, contentDescription = null)
+                    }
+                }
+                item {
+                    if (photos.loadState.append is LoadState.Loading) {
+                        // todo Add loader
+                        CircularProgressIndicator(modifier = modifier
+                            .height(50.dp)
+                            .fillMaxWidth())
+                    }
+                }
             }
         }
     }
