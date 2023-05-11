@@ -1,20 +1,18 @@
 package com.kudashov.learning_compose.network.home
 
+import androidx.paging.Pager
+import androidx.paging.PagingData
 import com.kudashov.learning_compose.domain.PhotoItem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+const val IMAGE_PAGE_SIZE = 20
+
 @Singleton
 class HomeRepository @Inject constructor(
-    private val api: HomeApi
+    private val pager: Pager<Int, PhotoItem>
 ) {
 
-    fun getListPhotos(
-        pageNumber: Int = 1,
-        photosPerPage: Int = 10
-    ): Flow<List<PhotoItem>> = flow {
-        emit(api.getImages(pageNumber, photosPerPage).map { it.transform() })
-    }
+    fun getPagedListFlow(): Flow<PagingData<PhotoItem>> = pager.flow
 }
