@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -101,49 +101,53 @@ fun SearchBar(modifier: Modifier) {
 fun VerticalStaggeredRoundedGrid(
     modifier: Modifier,
     photos: LazyPagingItems<PhotoItem>
+) = Box(
+    modifier = modifier
+        .padding(top = 24.dp, start = 22.dp, end = 22.dp)
+        .fillMaxSize()
 ) {
-    Box(
-        modifier = modifier
-            .padding(top = 24.dp, start = 22.dp, end = 22.dp)
-            .fillMaxSize()
-    ) {
-        if (photos.loadState.refresh is LoadState.Loading) {
-            // todo Add shimmers
-            CircularProgressIndicator(
-                modifier = modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center),
-            )
-        } else {
-            LazyVerticalStaggeredGrid(
-                modifier = modifier.fillMaxSize(),
-                columns = StaggeredGridCells.Fixed(2),
-            ) {
-                items(
-                    count = photos.itemCount,
-                    key = photos.itemKey(),
-                    contentType = photos.itemContentType(
+    if (photos.loadState.refresh is LoadState.Loading) {
+        // todo Add shimmers
+        CircularProgressIndicator(
+            modifier = modifier.align(Alignment.Center),
+            color = MaterialTheme.colorScheme.tertiary
+        )
+    } else {
+        LazyVerticalStaggeredGrid(
+            modifier = modifier.fillMaxSize(),
+            columns = StaggeredGridCells.Fixed(2),
+        ) {
+            items(
+                count = photos.itemCount,
+                key = photos.itemKey(),
+                contentType = photos.itemContentType()
+            ) { index ->
+                val item = photos[index]
+                Card(
+                    modifier = modifier.padding(4.dp),
+                    shape = RoundedCornerShape(
+                        topStart = if (index == 0) 8.dp else 0.dp,
+                        topEnd = if (index == 1) 8.dp else 0.dp,
+                        bottomStart = 0.dp,
+                        bottomEnd = 0.dp
                     )
-                ) { index ->
-                    val item = photos[index]
-                    Card(
-                        modifier = modifier.padding(4.dp),
-                        shape = RoundedCornerShape(
-                            topStart = if (index == 0) 8.dp else 0.dp,
-                            topEnd = if (index == 1) 8.dp else 0.dp,
-                            bottomStart = 0.dp,
-                            bottomEnd = 0.dp
-                        )
-                    ) {
-                        AsyncImage(model = item?.url, contentDescription = null)
-                    }
+                ) {
+                    AsyncImage(model = item?.url, contentDescription = null)
                 }
-                item {
-                    if (photos.loadState.append is LoadState.Loading) {
-                        // todo Add loader
-                        CircularProgressIndicator(modifier = modifier
-                            .height(50.dp)
-                            .fillMaxWidth())
+            }
+            item(span = StaggeredGridItemSpan.FullLine) {
+                if (photos.loadState.append is LoadState.Loading) {
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(4.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = modifier
+                                .padding(8.dp)
+                                .align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.tertiary,
+                        )
                     }
                 }
             }
