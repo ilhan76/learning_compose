@@ -4,12 +4,14 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -68,7 +70,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun SearchBar(modifier: Modifier) {
+private fun SearchBar(modifier: Modifier) {
     var inputText by remember { mutableStateOf("") }
     TextField(
         value = inputText,
@@ -98,7 +100,7 @@ fun SearchBar(modifier: Modifier) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun VerticalStaggeredRoundedGrid(
+private fun VerticalStaggeredRoundedGrid(
     modifier: Modifier,
     photos: LazyPagingItems<PhotoItem>
 ) = Box(
@@ -106,57 +108,85 @@ fun VerticalStaggeredRoundedGrid(
         .padding(top = 24.dp, start = 22.dp, end = 22.dp)
         .fillMaxSize()
 ) {
-    if (photos.loadState.refresh is LoadState.Loading) {
-        // todo Add shimmers
-        CircularProgressIndicator(
-            modifier = modifier.align(Alignment.Center),
-            color = MaterialTheme.colorScheme.tertiary
-        )
-    } else {
-        LazyVerticalStaggeredGrid(
-            modifier = modifier.fillMaxSize(),
-            columns = StaggeredGridCells.Fixed(2),
-        ) {
-            items(
-                count = photos.itemCount,
-                key = photos.itemKey(),
-                contentType = photos.itemContentType()
-            ) { index ->
-                val item = photos[index]
-                Card(
-                    modifier = modifier.padding(4.dp),
-                    shape = RoundedCornerShape(
-                        topStart = if (index == 0) 8.dp else 0.dp,
-                        topEnd = if (index == 1) 8.dp else 0.dp,
-                        bottomStart = 0.dp,
-                        bottomEnd = 0.dp
-                    )
-                ) {
-                    AsyncImage(model = item?.url, contentDescription = null)
-                }
-            }
-            item(span = StaggeredGridItemSpan.FullLine) {
-                if (photos.loadState.append is LoadState.Loading) {
-                    Box(
-                        modifier = modifier
-                            .fillMaxSize()
-                            .padding(4.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = modifier
-                                .padding(8.dp)
-                                .align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.tertiary,
+    when (photos.loadState.refresh) {
+        is LoadState.Loading -> {
+            // todo Add shimmers
+            CircularProgressIndicator(
+                modifier = modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.tertiary
+            )
+        }
+        is LoadState.Error -> FullScreenPlaceholder(modifier)
+        else -> {
+            LazyVerticalStaggeredGrid(
+                modifier = modifier.fillMaxSize(),
+                columns = StaggeredGridCells.Fixed(2),
+            ) {
+                items(
+                    count = photos.itemCount,
+                    key = photos.itemKey(),
+                    contentType = photos.itemContentType()
+                ) { index ->
+                    val item = photos[index]
+                    Card(
+                        modifier = modifier.padding(4.dp),
+                        shape = RoundedCornerShape(
+                            topStart = if (index == 0) 8.dp else 0.dp,
+                            topEnd = if (index == 1) 8.dp else 0.dp,
+                            bottomStart = 0.dp,
+                            bottomEnd = 0.dp
                         )
+                    ) {
+                        AsyncImage(model = item?.url, contentDescription = null)
                     }
                 }
+                if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
             }
         }
     }
 }
 
 @Composable
-fun TabBarItem(
+private fun FullScreenPlaceholder(modifier: Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_error),
+            contentDescription = null,
+            modifier = modifier.padding(start = 32.dp, top = 32.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+        Text(
+            modifier = modifier,
+            text = "Упс, что-то пошло не так...",
+            style = ProjectTextStyle.RegularText18Black
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier) {
+    item(span = StaggeredGridItemSpan.FullLine) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(4.dp)
+        ) {
+            CircularProgressIndicator(
+                modifier = modifier
+                    .padding(8.dp)
+                    .align(Alignment.Center),
+                color = MaterialTheme.colorScheme.tertiary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TabBarItem(
     modifier: Modifier = Modifier,
     onTabClicked: (String) -> Unit = {},
     tabData: TabData
