@@ -6,9 +6,7 @@ import com.kudashov.learning_compose.domain.PhotoItem
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class HomeRemotePagerSource @Inject constructor(
     private val homeApi: HomeApi
 ) : PagingSource<Int, PhotoItem>() {
