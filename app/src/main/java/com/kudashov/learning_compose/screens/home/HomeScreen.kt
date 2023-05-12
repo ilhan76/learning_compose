@@ -1,7 +1,6 @@
 package com.kudashov.learning_compose.screens.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +15,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -98,51 +101,61 @@ private fun SearchBar(modifier: Modifier) {
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun VerticalStaggeredRoundedGrid(
     modifier: Modifier,
     photos: LazyPagingItems<PhotoItem>
-) = Box(
-    modifier = modifier
-        .padding(top = 24.dp, start = 22.dp, end = 22.dp)
-        .fillMaxSize()
 ) {
-    when (photos.loadState.refresh) {
-        is LoadState.Loading -> {
-            // todo Add shimmers
-            CircularProgressIndicator(
-                modifier = modifier.align(Alignment.Center),
-                color = MaterialTheme.colorScheme.tertiary
-            )
+    var isRefreshing by remember { mutableStateOf(false) }
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = {
+            //fixme Разобраться, почему не работает
+            isRefreshing = true
+            photos.refresh()
         }
-        is LoadState.Error -> FullScreenPlaceholder(modifier)
-        else -> {
-            LazyVerticalStaggeredGrid(
-                modifier = modifier.fillMaxSize(),
-                columns = StaggeredGridCells.Fixed(2),
-            ) {
-                items(
-                    count = photos.itemCount,
-                    key = photos.itemKey(),
-                    contentType = photos.itemContentType()
-                ) { index ->
-                    val item = photos[index]
-                    Card(
-                        modifier = modifier.padding(4.dp),
-                        shape = RoundedCornerShape(
-                            topStart = if (index == 0) 8.dp else 0.dp,
-                            topEnd = if (index == 1) 8.dp else 0.dp,
-                            bottomStart = 0.dp,
-                            bottomEnd = 0.dp
-                        )
-                    ) {
-                        AsyncImage(model = item?.url, contentDescription = null)
+    )
+    Box(
+        modifier = modifier
+            .pullRefresh(pullRefreshState)
+            .padding(top = 24.dp, start = 22.dp, end = 22.dp)
+            .fillMaxSize()
+    ) {
+        when {
+            photos.loadState.refresh is LoadState.Loading && !isRefreshing -> {
+                // todo Add shimmers
+                CircularProgressIndicator(
+                    modifier = modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+
+            photos.loadState.refresh is LoadState.Error -> FullScreenPlaceholder(modifier)
+            else -> {
+                isRefreshing = false
+                LazyVerticalStaggeredGrid(
+                    modifier = modifier.fillMaxSize(),
+                    columns = StaggeredGridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    verticalItemSpacing = 9.dp
+                ) {
+                    items(
+                        count = photos.itemCount,
+                        key = photos.itemKey(),
+                        contentType = photos.itemContentType()
+                    ) { index ->
+                        PhotoGridItem(photos[index], index)
                     }
+                    if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
                 }
-                if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
             }
         }
+        PullRefreshIndicator(
+            isRefreshing,
+            pullRefreshState,
+            Modifier.align(Alignment.TopCenter)
+        )
     }
 }
 
@@ -167,7 +180,20 @@ private fun FullScreenPlaceholder(modifier: Modifier) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun PhotoGridItem(item: PhotoItem?, index: Int) {
+    Card(
+        shape = RoundedCornerShape(
+            topStart = if (index == 0) 8.dp else 0.dp,
+            topEnd = if (index == 1) 8.dp else 0.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        )
+    ) {
+        AsyncImage(model = item?.url, contentDescription = null)
+    }
+}
+
 private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier) {
     item(span = StaggeredGridItemSpan.FullLine) {
         Box(
