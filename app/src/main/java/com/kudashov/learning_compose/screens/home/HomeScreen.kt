@@ -1,6 +1,10 @@
 package com.kudashov.learning_compose.screens.home
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,12 +12,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -33,9 +39,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
@@ -48,7 +59,9 @@ import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.domain.PhotoItem
 import com.kudashov.learning_compose.screens.home.ui_data.TabData
 import com.kudashov.learning_compose.ui.style.ProjectTextStyle
+import com.kudashov.learning_compose.ui.theme.Grey
 import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.ui.theme.LightGrey
 
 @Composable
 fun HomeScreen(
@@ -122,24 +135,17 @@ private fun VerticalStaggeredRoundedGrid(
             .padding(top = 24.dp, start = 22.dp, end = 22.dp)
             .fillMaxSize()
     ) {
-        when {
-            photos.loadState.refresh is LoadState.Loading && !isRefreshing -> {
-                // todo Add shimmers
-                CircularProgressIndicator(
-                    modifier = modifier.align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
-
-            photos.loadState.refresh is LoadState.Error -> FullScreenPlaceholder(modifier)
-            else -> {
-                isRefreshing = false
-                LazyVerticalStaggeredGrid(
-                    modifier = modifier.fillMaxSize(),
-                    columns = StaggeredGridCells.Fixed(2),
-                    horizontalArrangement = Arrangement.spacedBy(9.dp),
-                    verticalItemSpacing = 9.dp
-                ) {
+        LazyVerticalStaggeredGrid(
+            modifier = modifier.fillMaxSize(),
+            columns = StaggeredGridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
+            verticalItemSpacing = 9.dp
+        ) {
+            when {
+                photos.loadState.refresh is LoadState.Loading && !isRefreshing-> addShimmers(modifier)
+                photos.loadState.refresh is LoadState.Error -> addErrorPlaceholder(modifier)
+                else -> {
+                    if (photos.loadState.refresh is LoadState.NotLoading) isRefreshing = false
                     items(
                         count = photos.itemCount,
                         key = photos.itemKey(),
@@ -147,9 +153,9 @@ private fun VerticalStaggeredRoundedGrid(
                     ) { index ->
                         PhotoGridItem(photos[index], index)
                     }
-                    if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
                 }
             }
+            if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
         }
         PullRefreshIndicator(
             isRefreshing,
@@ -159,24 +165,25 @@ private fun VerticalStaggeredRoundedGrid(
     }
 }
 
-@Composable
-private fun FullScreenPlaceholder(modifier: Modifier) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_error),
-            contentDescription = null,
-            modifier = modifier.padding(start = 32.dp, top = 32.dp),
-            tint = MaterialTheme.colorScheme.error
-        )
-        Text(
-            modifier = modifier,
-            text = "Упс, что-то пошло не так...",
-            style = ProjectTextStyle.RegularText18Black
-        )
+private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier) {
+    item(span = StaggeredGridItemSpan.FullLine) {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_error),
+                contentDescription = null,
+                modifier = modifier.padding(start = 32.dp, top = 32.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+            Text(
+                modifier = modifier,
+                text = "Упс, что-то пошло не так...",
+                style = ProjectTextStyle.RegularText18Black
+            )
+        }
     }
 }
 
@@ -192,6 +199,38 @@ private fun PhotoGridItem(item: PhotoItem?, index: Int) {
     ) {
         AsyncImage(model = item?.url, contentDescription = null)
     }
+}
+
+private fun LazyStaggeredGridScope.addShimmers(modifier: Modifier) {
+    val list = listOf(96, 224, 224, 131, 131, 96)
+    items(list) { ShimmerItem(modifier = modifier, height = it) }
+}
+
+private fun Modifier.shimmerEffect(): Modifier = composed {
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val transition = rememberInfiniteTransition()
+    val stateOffsetX by transition.animateFloat(
+        initialValue = -2 * size.width.toFloat(),
+        targetValue = 2 * size.width.toFloat(),
+        animationSpec = infiniteRepeatable(tween(1000))
+    )
+
+    background(
+        brush = Brush.linearGradient(
+            colors = listOf(Grey, LightGrey, Grey),
+            start = Offset(stateOffsetX, 0f),
+            end = Offset(stateOffsetX + size.width.toFloat(), size.height.toFloat())
+        )
+    ).onGloballyPositioned { size = it.size }
+}
+@Composable
+fun ShimmerItem(modifier: Modifier, height: Int) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height.dp)
+            .shimmerEffect()
+    )
 }
 
 private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier) {
