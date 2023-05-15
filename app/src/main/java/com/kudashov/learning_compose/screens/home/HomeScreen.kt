@@ -79,14 +79,14 @@ fun HomeScreen(
         SearchBar(modifier)
 
         VerticalStaggeredRoundedGrid(
-            modifier = modifier,
-            photos = viewModel.getPhotos().collectAsLazyPagingItems()
+            photos = viewModel.getPhotos().collectAsLazyPagingItems(),
+            modifier = modifier
         )
     }
 }
 
 @Composable
-private fun SearchBar(modifier: Modifier) {
+private fun SearchBar(modifier: Modifier = Modifier) {
     var inputText by remember { mutableStateOf("") }
     TextField(
         value = inputText,
@@ -117,8 +117,8 @@ private fun SearchBar(modifier: Modifier) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun VerticalStaggeredRoundedGrid(
-    modifier: Modifier,
-    photos: LazyPagingItems<PhotoItem>
+    photos: LazyPagingItems<PhotoItem>,
+    modifier: Modifier = Modifier,
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
     val pullRefreshState = rememberPullRefreshState(
@@ -165,7 +165,56 @@ private fun VerticalStaggeredRoundedGrid(
     }
 }
 
-private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier) {
+@Composable
+private fun PhotoGridItem(item: PhotoItem?, index: Int) {
+    Card(
+        shape = RoundedCornerShape(
+            topStart = if (index == 0) 8.dp else 0.dp,
+            topEnd = if (index == 1) 8.dp else 0.dp,
+            bottomStart = 0.dp,
+            bottomEnd = 0.dp
+        )
+    ) {
+        AsyncImage(model = item?.url, contentDescription = null)
+    }
+}
+
+@Composable
+fun ShimmerItem(height: Int, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height.dp)
+            .shimmerEffect()
+    )
+}
+
+@Composable
+private fun TabBarItem(
+    tabData: TabData,
+    modifier: Modifier = Modifier,
+    onTabClicked: (String) -> Unit = {},
+) {
+    Box(
+        modifier = modifier.clickable {
+            onTabClicked(tabData.id)
+        }
+    ) {
+        tabData.hint?.let {
+            Text(
+                text = it,
+                style = ProjectTextStyle.RegularText10Hint
+            )
+        }
+        Text(
+            text = tabData.title,
+            modifier = modifier.padding(top = 16.dp, bottom = 12.dp),
+            style = if (tabData.isNewFeature) ProjectTextStyle.RegularText18Green else ProjectTextStyle.RegularText18Black
+        )
+    }
+}
+
+private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier = Modifier) {
     item(span = StaggeredGridItemSpan.FullLine) {
         Column(
             modifier = modifier.fillMaxSize(),
@@ -187,21 +236,7 @@ private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier) {
     }
 }
 
-@Composable
-private fun PhotoGridItem(item: PhotoItem?, index: Int) {
-    Card(
-        shape = RoundedCornerShape(
-            topStart = if (index == 0) 8.dp else 0.dp,
-            topEnd = if (index == 1) 8.dp else 0.dp,
-            bottomStart = 0.dp,
-            bottomEnd = 0.dp
-        )
-    ) {
-        AsyncImage(model = item?.url, contentDescription = null)
-    }
-}
-
-private fun LazyStaggeredGridScope.addShimmers(modifier: Modifier) {
+private fun LazyStaggeredGridScope.addShimmers(modifier: Modifier = Modifier) {
     val list = listOf(96, 224, 224, 131, 131, 96)
     items(list) { ShimmerItem(modifier = modifier, height = it) }
 }
@@ -223,17 +258,8 @@ private fun Modifier.shimmerEffect(): Modifier = composed {
         )
     ).onGloballyPositioned { size = it.size }
 }
-@Composable
-fun ShimmerItem(modifier: Modifier, height: Int) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height.dp)
-            .shimmerEffect()
-    )
-}
 
-private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier) {
+private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier = Modifier) {
     item(span = StaggeredGridItemSpan.FullLine) {
         Box(
             modifier = modifier
@@ -247,31 +273,6 @@ private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier) {
                 color = MaterialTheme.colorScheme.tertiary,
             )
         }
-    }
-}
-
-@Composable
-private fun TabBarItem(
-    modifier: Modifier = Modifier,
-    onTabClicked: (String) -> Unit = {},
-    tabData: TabData
-) {
-    Box(
-        modifier = modifier.clickable {
-            onTabClicked(tabData.id)
-        }
-    ) {
-        tabData.hint?.let {
-            Text(
-                text = it,
-                style = ProjectTextStyle.RegularText10Hint
-            )
-        }
-        Text(
-            text = tabData.title,
-            modifier = modifier.padding(top = 16.dp, bottom = 12.dp),
-            style = if (tabData.isNewFeature) ProjectTextStyle.RegularText18Green else ProjectTextStyle.RegularText18Black
-        )
     }
 }
 
