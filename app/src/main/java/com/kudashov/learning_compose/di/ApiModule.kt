@@ -1,6 +1,6 @@
 package com.kudashov.learning_compose.di
 
-import com.kudashov.learning_compose.network.home.HomeApi
+import com.kudashov.learning_compose.network.home.PhotosApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,5 +14,5 @@ class ApiModule {
 
     @Provides
     @Singleton
-    fun provideHomeApi(retrofit: Retrofit): HomeApi = retrofit.create(HomeApi::class.java)
+    fun provideHomeApi(retrofit: Retrofit): PhotosApi = retrofit.create(PhotosApi::class.java)
 }

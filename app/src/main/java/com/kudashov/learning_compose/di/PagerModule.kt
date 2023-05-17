@@ -3,8 +3,8 @@ package com.kudashov.learning_compose.di
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.kudashov.learning_compose.domain.PhotoItem
-import com.kudashov.learning_compose.network.home.HomeApi
-import com.kudashov.learning_compose.network.home.HomeRemotePagerSource
+import com.kudashov.learning_compose.network.home.PhotosApi
+import com.kudashov.learning_compose.network.home.PhotosRemotePagerSource
 import com.kudashov.learning_compose.network.home.IMAGE_PAGE_SIZE
 import dagger.Module
 import dagger.Provides
@@ -18,13 +18,13 @@ class PagerModule {
 
     @Provides
     @Singleton
-    fun provideHomePager(homeApi: HomeApi): Pager<Int, PhotoItem> {
+    fun provideHomePager(photosApi: PhotosApi): Pager<Int, PhotoItem> {
         return Pager(
             config = PagingConfig(
                 pageSize = IMAGE_PAGE_SIZE,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { HomeRemotePagerSource(homeApi) }
+            pagingSourceFactory = { PhotosRemotePagerSource(photosApi) }
         )
     }
 }
