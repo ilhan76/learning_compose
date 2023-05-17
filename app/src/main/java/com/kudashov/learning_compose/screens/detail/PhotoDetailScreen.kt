@@ -1,6 +1,7 @@
 package com.kudashov.learning_compose.screens.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +28,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.ui.style.ProjectTextStyle
-import com.kudashov.learning_compose.ui.theme.LightTextColor
+import com.kudashov.learning_compose.ui.theme.White
 
 @Composable
 fun PhotoDetailRoute(
@@ -56,18 +57,20 @@ fun PhotoDetailScreen(
             model = state.photoDetail?.url,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier
-                .fillMaxSize()
-                .background(LightTextColor)
+            modifier = modifier.fillMaxSize()
         )
 
         Icon(
             painter = painterResource(id = R.drawable.ic_arrow_back),
             contentDescription = null,
+            tint = White,
             modifier = modifier
                 .height(24.dp)
                 .width(24.dp)
                 .offset(x = 17.dp, y = 20.dp)
+                .clickable {
+                    navController.popBackStack()
+                }
         )
 
         Row(

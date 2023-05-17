@@ -1,34 +1,19 @@
 package com.kudashov.learning_compose.screens.home
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.kudashov.learning_compose.network.home.HomeRepository
+import com.kudashov.learning_compose.network.home.PhotosRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val homeRepository: HomeRepository
+    private val photosRepository: PhotosRepository
 ) : ViewModel() {
 
-    private val _state = mutableStateOf(HomeState())
-    val state: State<HomeState> = _state
-
-    init {
-        onEvent(HomeEvent.LoadPhotos)
+    val photos by lazy {
+        photosRepository.getPagedListFlow()
+            .cachedIn(viewModelScope)
     }
-
-    fun onEvent(event: HomeEvent) {
-        when (event) {
-            else -> {
-                // do nothing
-            }
-        }
-    }
-
-    fun getPhotos() = homeRepository.getPagedListFlow()
-        .cachedIn(viewModelScope)
 }
