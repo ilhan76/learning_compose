@@ -7,8 +7,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.ui.theme.HintTextColor
+import com.kudashov.learning_compose.ui.theme.LightGreen
 import com.kudashov.learning_compose.ui.theme.LightTextColor
-import com.kudashov.learning_compose.ui.theme.NewFeatureTextColor
 import com.kudashov.learning_compose.ui.theme.StandardTextColor
 
 object ProjectTextStyle {
@@ -26,12 +26,15 @@ object ProjectTextStyle {
 
     private val RegularText10 = Regular.copy(fontSize = 10.sp)
     private val RegularText14 = Regular.copy(fontSize = 14.sp)
+    private val RegularText16 = Regular.copy(fontSize = 16.sp)
     private val RegularText18 = Regular.copy(fontSize = 18.sp)
 
     val RegularText10Hint = RegularText10.copy(color = HintTextColor)
 
     val RegularText14Light = RegularText14.copy(color = LightTextColor)
 
+    val RegularText16Green = RegularText16.copy(color = LightGreen)
+
     val RegularText18Black = RegularText18.copy(color = StandardTextColor)
-    val RegularText18Green = RegularText18.copy(color = NewFeatureTextColor)
+    val RegularText18Green = RegularText18.copy(color = LightGreen)
 }
