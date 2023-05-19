@@ -22,15 +22,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -75,7 +73,6 @@ fun PhotoDetailScreen(
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
 
     val interactionSource = remember { MutableInteractionSource() }
-    var isBottomSheetVisible by remember { mutableStateOf(false) }
 
     BottomSheetScaffold(
         sheetDragHandle = null,
@@ -83,7 +80,6 @@ fun PhotoDetailScreen(
         scaffoldState = scaffoldState,
         sheetContent = {
             BottomSheetContent(state, modifier) {
-                isBottomSheetVisible = false
                 scope.launch { sheetState.hide() }
             }
         }
@@ -93,21 +89,19 @@ fun PhotoDetailScreen(
             navController = navController,
             modifier = modifier,
             openBottomSheet = {
-                isBottomSheetVisible = true
                 scope.launch {
                     sheetState.expand()
                 }
             }
         )
-        if (isBottomSheetVisible) Box(
+        if (sheetState.targetValue == SheetValue.Expanded) Box(
             modifier = modifier
                 .fillMaxSize()
                 .background(color = Black.copy(alpha = 0.4f))
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null
-                ) {isBottomSheetVisible = false
-
+                ) {
                     scope.launch { sheetState.hide() }
                 }
         )
