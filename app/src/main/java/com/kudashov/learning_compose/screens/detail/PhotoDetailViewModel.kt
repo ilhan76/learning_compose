@@ -1,7 +1,8 @@
 package com.kudashov.learning_compose.screens.detail
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kudashov.learning_compose.network.home.PhotosRepository
@@ -14,13 +15,12 @@ class PhotoDetailViewModel @Inject constructor(
     private val photosRepository: PhotosRepository
 ): ViewModel() {
 
-    private val _state = mutableStateOf(PhotoDetailState())
-    val state: State<PhotoDetailState> = _state
-
+    var state by mutableStateOf(PhotoDetailState())
+        private set
 
     fun loadPhotoDetail(id: String) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(
+            state = state.copy(
                 photoDetail = photosRepository.getPhotoDetail(id)
             )
         }

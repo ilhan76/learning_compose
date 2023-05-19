@@ -7,8 +7,9 @@ import com.kudashov.learning_compose.domain.Transformable
 data class PhotoDetailDto(
     @SerializedName("id") val id: String,
     @SerializedName("description") val description: String?,
-    @SerializedName("urls") val urls: Urls
-): Transformable<PhotoDetail> {
+    @SerializedName("urls") val urls: Urls,
+    @SerializedName("user") val user: UserDto
+) : Transformable<PhotoDetail> {
 
     override fun transform(): PhotoDetail = PhotoDetail(
         id = id,
@@ -17,3 +18,7 @@ data class PhotoDetailDto(
     )
 
 }
+
+data class UserDto(
+    @SerializedName("name") val name: String
+)
