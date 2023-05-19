@@ -10,9 +10,12 @@ import javax.inject.Singleton
 const val IMAGE_PAGE_SIZE = 20
 
 @Singleton
-class HomeRepository @Inject constructor(
-    private val pager: Pager<Int, PhotoItem>
+class PhotosRepository @Inject constructor(
+    private val pager: Pager<Int, PhotoItem>,
+    private val photosApi: PhotosApi
 ) {
 
     fun getPagedListFlow(): Flow<PagingData<PhotoItem>> = pager.flow
+
+    suspend fun getPhotoDetail(id: String) = photosApi.getPhotoDetail(id).transform()
 }

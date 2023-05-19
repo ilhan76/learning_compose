@@ -18,7 +18,7 @@ import androidx.core.view.ViewCompat
 private val DarkColorScheme = darkColorScheme(
     primary = Dark,
     secondary = Black,
-    tertiary = LightGreen,
+    tertiary = SuperLightGreen,
     onPrimary = White
 )
 
@@ -43,7 +43,7 @@ private val LightColorScheme = lightColorScheme(
 fun LearningComposeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

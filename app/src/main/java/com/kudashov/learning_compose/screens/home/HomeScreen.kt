@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -57,6 +58,7 @@ import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.domain.PhotoItem
+import com.kudashov.learning_compose.navigation.Screen
 import com.kudashov.learning_compose.screens.home.ui_data.TabData
 import com.kudashov.learning_compose.ui.style.ProjectTextStyle
 import com.kudashov.learning_compose.ui.theme.Grey
@@ -66,7 +68,8 @@ import com.kudashov.learning_compose.ui.theme.LightGrey
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
         Icon(
@@ -79,8 +82,9 @@ fun HomeScreen(
         SearchBar(modifier)
 
         VerticalStaggeredRoundedGrid(
-            photos = viewModel.getPhotos().collectAsLazyPagingItems(),
-            modifier = modifier
+            photos = viewModel.photos.collectAsLazyPagingItems(),
+            modifier = modifier,
+            navController = navController
         )
     }
 }
@@ -118,6 +122,7 @@ private fun SearchBar(modifier: Modifier = Modifier) {
 @Composable
 private fun VerticalStaggeredRoundedGrid(
     photos: LazyPagingItems<PhotoItem>,
+    navController: NavController,
     modifier: Modifier = Modifier,
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
@@ -142,7 +147,10 @@ private fun VerticalStaggeredRoundedGrid(
             verticalItemSpacing = 9.dp
         ) {
             when {
-                photos.loadState.refresh is LoadState.Loading && !isRefreshing-> addShimmers(modifier)
+                photos.loadState.refresh is LoadState.Loading && !isRefreshing -> addShimmers(
+                    modifier
+                )
+
                 photos.loadState.refresh is LoadState.Error -> addErrorPlaceholder(modifier)
                 else -> {
                     if (photos.loadState.refresh is LoadState.NotLoading) isRefreshing = false
@@ -151,7 +159,10 @@ private fun VerticalStaggeredRoundedGrid(
                         key = photos.itemKey(),
                         contentType = photos.itemContentType()
                     ) { index ->
-                        PhotoGridItem(photos[index], index)
+                        val photo = photos[index]
+                        PhotoGridItem(photo, index, modifier.clickable {
+                            photo?.let { navController.navigate("${Screen.Detail.route}/${photo.id}") }
+                        })
                     }
                 }
             }
@@ -166,14 +177,19 @@ private fun VerticalStaggeredRoundedGrid(
 }
 
 @Composable
-private fun PhotoGridItem(item: PhotoItem?, index: Int) {
+private fun PhotoGridItem(
+    item: PhotoItem?,
+    index: Int,
+    modifier: Modifier = Modifier
+) {
     Card(
         shape = RoundedCornerShape(
             topStart = if (index == 0) 8.dp else 0.dp,
             topEnd = if (index == 1) 8.dp else 0.dp,
             bottomStart = 0.dp,
             bottomEnd = 0.dp
-        )
+        ),
+        modifier = modifier
     ) {
         AsyncImage(model = item?.url, contentDescription = null)
     }
@@ -276,23 +292,15 @@ private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier = Modifier
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    widthDp = 320,
+    uiMode = UI_MODE_NIGHT_YES,
+    name = "TabBarItem"
+)
 @Composable
 fun TestPreview() {
     LearningComposeTheme {
         TabBarItem(tabData = TabData("123", true, "Bka bla", "Qweqwe"))
     }
 }
-
-@Preview(
-    showBackground = true,
-    widthDp = 320,
-    uiMode = UI_MODE_NIGHT_YES,
-    name = "DefaultPreviewDark"
-)
-@Composable
-fun DefaultPreviewDark() = LearningComposeTheme { HomeScreen() }
-
-@Preview(showBackground = true, widthDp = 320)
-@Composable
-fun DefaultPreview() = LearningComposeTheme { HomeScreen() }
