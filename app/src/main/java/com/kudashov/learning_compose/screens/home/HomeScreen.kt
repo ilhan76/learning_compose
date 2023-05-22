@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
@@ -65,7 +66,7 @@ import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.domain.PhotoItem
 import com.kudashov.learning_compose.navigation.Screen
-import com.kudashov.learning_compose.screens.home.ui_data.TabData
+import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import com.kudashov.learning_compose.ui.style.ProjectTextStyle
 import com.kudashov.learning_compose.ui.theme.Grey
 import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
@@ -143,11 +144,20 @@ private fun PageList(
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         items(state.tabs) { tabData ->
-            TabBarItem(
-                tabData = tabData,
-                modifier = modifier,
-                onTabClicked = onTabClicked
-            )
+            when (tabData) {
+                is TabItem.TextTabItem -> TabBarItem(
+                    textTabItem = tabData,
+                    modifier = modifier,
+                    onTabClicked = onTabClicked
+                )
+
+                TabItem.Divider -> Box(
+                    modifier = modifier
+                        .height(38.dp)
+                        .width(1.dp)
+                        .background(color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.16f))
+                )
+            }
         }
     }
 }
@@ -241,20 +251,20 @@ fun ShimmerItem(height: Int, modifier: Modifier = Modifier) {
 
 @Composable
 private fun TabBarItem(
-    tabData: TabData,
+    textTabItem: TabItem.TextTabItem,
     modifier: Modifier = Modifier,
     onTabClicked: (String) -> Unit = {},
 ) {
     Box(
-        if (tabData.isSelected) modifier.bottomBorder(
+        if (textTabItem.isSelected) modifier.bottomBorder(
             color = MaterialTheme.colorScheme.onPrimary,
             lineHeight = with(LocalDensity.current) { 2.dp.toPx() }
         ) else modifier
             .clickable {
-                onTabClicked(tabData.id)
+                onTabClicked(textTabItem.id)
             }
     ) {
-        if (tabData.isNewFeature) {
+        if (textTabItem.isNewFeature) {
             Text(
                 text = "New Feature",
                 style = ProjectTextStyle.RegularText10Hint,
@@ -262,11 +272,11 @@ private fun TabBarItem(
             )
         }
         Text(
-            text = tabData.title,
+            text = textTabItem.title,
             modifier = modifier.padding(top = 16.dp, bottom = 12.dp),
             style = when {
-                tabData.isNewFeature -> ProjectTextStyle.RegularText18Green
-                tabData.isSelected -> ProjectTextStyle.RegularText18Black
+                textTabItem.isNewFeature -> ProjectTextStyle.RegularText18Green
+                textTabItem.isSelected -> ProjectTextStyle.RegularText18Black
                 else -> ProjectTextStyle.RegularText18Light
             }
         )
@@ -354,6 +364,6 @@ private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier = Modifier
 @Composable
 fun TestPreview() {
     LearningComposeTheme {
-        TabBarItem(tabData = TabData("123", true, "Bka bla", true))
+        TabBarItem(textTabItem = TabItem.TextTabItem("123", true, "Bka bla", true))
     }
 }

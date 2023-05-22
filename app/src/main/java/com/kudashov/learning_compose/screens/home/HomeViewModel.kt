@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.kudashov.learning_compose.network.home.PhotosRepository
+import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -31,11 +32,17 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onTabClicked(id: String) {
-        savedStateHandle[HOME_STATE] = state.value.copy(
-            tabs = ItemCreator.getTabItems().map {
+        val updatedTabs = state.value.tabs.map {
+            if (it is TabItem.TextTabItem) {
                 if (id == it.id) it.copy(isSelected = true)
                 else it.copy(isSelected = false)
+            } else {
+                it
             }
+        }
+
+        savedStateHandle[HOME_STATE] = state.value.copy(
+            tabs = updatedTabs
         )
     }
 }
