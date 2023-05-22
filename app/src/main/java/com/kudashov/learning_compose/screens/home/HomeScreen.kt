@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -33,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,10 +43,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -71,6 +77,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController
 ) {
+    val state = viewModel.state.collectAsState()
+
     Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
         Icon(
             painter = painterResource(id = R.drawable.surf_logo),
@@ -80,6 +88,12 @@ fun HomeScreen(
         )
 
         SearchBar(modifier)
+
+        PageList(
+            state = state.value,
+            modifier = modifier,
+            onTabClicked = viewModel::onTabClicked
+        )
 
         VerticalStaggeredRoundedGrid(
             photos = viewModel.photos.collectAsLazyPagingItems(),
@@ -116,6 +130,26 @@ private fun SearchBar(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .heightIn(min = 40.dp),
     )
+}
+
+@Composable
+private fun PageList(
+    state: HomeState,
+    modifier: Modifier = Modifier,
+    onTabClicked: (String) -> Unit
+) {
+    LazyRow(
+        modifier = modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        items(state.tabs) { tabData ->
+            TabBarItem(
+                tabData = tabData,
+                modifier = modifier,
+                onTabClicked = onTabClicked
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -212,20 +246,29 @@ private fun TabBarItem(
     onTabClicked: (String) -> Unit = {},
 ) {
     Box(
-        modifier = modifier.clickable {
-            onTabClicked(tabData.id)
-        }
+        if (tabData.isSelected) modifier.bottomBorder(
+            color = MaterialTheme.colorScheme.onPrimary,
+            lineHeight = with(LocalDensity.current) { 2.dp.toPx() }
+        ) else modifier
+            .clickable {
+                onTabClicked(tabData.id)
+            }
     ) {
-        tabData.hint?.let {
+        if (tabData.isNewFeature) {
             Text(
-                text = it,
-                style = ProjectTextStyle.RegularText10Hint
+                text = "New Feature",
+                style = ProjectTextStyle.RegularText10Hint,
+                modifier = modifier.padding(top = 2.dp)
             )
         }
         Text(
             text = tabData.title,
             modifier = modifier.padding(top = 16.dp, bottom = 12.dp),
-            style = if (tabData.isNewFeature) ProjectTextStyle.RegularText18Green else ProjectTextStyle.RegularText18Black
+            style = when {
+                tabData.isNewFeature -> ProjectTextStyle.RegularText18Green
+                tabData.isSelected -> ProjectTextStyle.RegularText18Black
+                else -> ProjectTextStyle.RegularText18Light
+            }
         )
     }
 }
@@ -245,7 +288,7 @@ private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier = Modi
             )
             Text(
                 modifier = modifier,
-                text = "Упс, что-то пошло не так...",
+                text = "Упс, что-то пошло не так!",
                 style = ProjectTextStyle.RegularText18Black
             )
         }
@@ -275,6 +318,16 @@ private fun Modifier.shimmerEffect(): Modifier = composed {
     ).onGloballyPositioned { size = it.size }
 }
 
+fun Modifier.bottomBorder(color: Color, lineHeight: Float) = drawBehind {
+    val y = size.height - lineHeight
+
+    drawRect(
+        color = color,
+        topLeft = Offset(0f, y),
+        size = Size(size.width, lineHeight)
+    )
+}
+
 private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier = Modifier) {
     item(span = StaggeredGridItemSpan.FullLine) {
         Box(
@@ -301,6 +354,6 @@ private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier = Modifier
 @Composable
 fun TestPreview() {
     LearningComposeTheme {
-        TabBarItem(tabData = TabData("123", true, "Bka bla", "Qweqwe"))
+        TabBarItem(tabData = TabData("123", true, "Bka bla", true))
     }
 }

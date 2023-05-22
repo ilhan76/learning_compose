@@ -1,8 +1,12 @@
 package com.kudashov.learning_compose.screens.home.ui_data
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 data class TabData(
     val id: String,
     val isNewFeature: Boolean,
-    val hint: String?,
-    val title: String
-)
+    val title: String,
+    val isSelected: Boolean
+) : Parcelable

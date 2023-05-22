@@ -40,6 +40,7 @@ object ProjectTextStyle {
 
     val RegularText18Black = RegularText18.copy(color = StandardTextColor)
     val RegularText18Green = RegularText18.copy(color = LightGreen)
+    val RegularText18Light = RegularText18.copy(color = LightTextColor)
 
     val RegularText24Black = RegularText24.copy(color = StandardTextColor)
 }
