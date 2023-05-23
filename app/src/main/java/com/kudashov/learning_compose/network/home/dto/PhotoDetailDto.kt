@@ -2,7 +2,7 @@ package com.kudashov.learning_compose.network.home.dto
 
 import com.google.gson.annotations.SerializedName
 import com.kudashov.learning_compose.domain.PhotoDetail
-import com.kudashov.learning_compose.domain.Transformable
+import com.kudashov.learning_compose.domain.util.Transformable
 
 data class PhotoDetailDto(
     @SerializedName("id") val id: String,

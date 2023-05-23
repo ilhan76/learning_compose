@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.domain
+package com.kudashov.learning_compose.domain.util
 
 interface Transformable<T> {
 

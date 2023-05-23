@@ -2,8 +2,10 @@ package com.kudashov.learning_compose.network.home
 
 import androidx.paging.Pager
 import androidx.paging.PagingData
+import com.kudashov.learning_compose.domain.PhotoDetail
 import com.kudashov.learning_compose.domain.PhotoItem
-import com.kudashov.learning_compose.domain.transform
+import com.kudashov.learning_compose.domain.Topic
+import com.kudashov.learning_compose.domain.util.transform
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,7 +20,9 @@ class PhotosRepository @Inject constructor(
 
     fun getPagedListFlow(): Flow<PagingData<PhotoItem>> = pager.flow
 
-    suspend fun getTopicList() = photosApi.getTopics().transform()
+    suspend fun getTopicList(): List<Topic> = photosApi.getTopics().transform()
 
-    suspend fun getPhotoDetail(id: String) = photosApi.getPhotoDetail(id).transform()
+    suspend fun getRandomPhoto(): PhotoDetail = photosApi.getRandomPhoto().transform()
+
+    suspend fun getPhotoDetail(id: String): PhotoDetail = photosApi.getPhotoDetail(id).transform()
 }

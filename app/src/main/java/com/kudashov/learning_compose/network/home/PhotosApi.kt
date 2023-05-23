@@ -25,6 +25,9 @@ interface PhotosApi {
     @GET(BaseUrls.TOPICS)
     suspend fun getTopics() : List<TopicDto>
 
+    @GET(BaseUrls.RANDOM_PHOTO)
+    suspend fun getRandomPhoto() : PhotoDetailDto
+
     @GET("${BaseUrls.LIST_PHOTOS}/{id}")
     suspend fun getPhotoDetail(@Path("id") id: String): PhotoDetailDto
 }

@@ -5,8 +5,10 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
@@ -37,7 +40,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,7 +67,10 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
+import com.kudashov.learning_compose.domain.PhotoDetail
 import com.kudashov.learning_compose.domain.PhotoItem
+import com.kudashov.learning_compose.domain.util.LoadStatus
+import com.kudashov.learning_compose.domain.util.LoadableData
 import com.kudashov.learning_compose.navigation.Screen
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import com.kudashov.learning_compose.ui.style.ProjectTextStyle
@@ -79,11 +84,9 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController
 ) {
-    val state = viewModel.state.collectAsState()
+    val state = viewModel.state
 
-    LaunchedEffect(key1 = Unit) {
-        viewModel.loadTopics()
-    }
+    LaunchedEffect(key1 = Unit) { viewModel.loadTopics() }
 
     Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
         Icon(
@@ -96,20 +99,23 @@ fun HomeScreen(
         SearchBar(modifier)
 
         PageList(
-            state = state.value,
+            state = state,
             modifier = modifier,
             onTabClicked = viewModel::onTabClicked
         )
 
-        when (state.value.selectedTopicId) {
+        when (state.selectedTopicId) {
             ItemCreator.EDITORIAL_ID -> VerticalStaggeredRoundedGrid(
                 photos = viewModel.photos.collectAsLazyPagingItems(),
                 modifier = modifier,
                 navController = navController
             )
-            ItemCreator.RANDOM_PHOTO_ID -> {
-                // todo
-            }
+
+            ItemCreator.RANDOM_PHOTO_ID -> RandomPhoto(
+                loadableData = state.randomPhoto,
+                modifier = modifier
+            )
+
             else -> {
                 // todo
             }
@@ -230,6 +236,64 @@ private fun VerticalStaggeredRoundedGrid(
             pullRefreshState,
             Modifier.align(Alignment.TopCenter)
         )
+    }
+}
+
+@Composable
+private fun RandomPhoto(
+    loadableData: LoadableData<PhotoDetail>,
+    modifier: Modifier = Modifier
+) = LazyColumn {
+    item {
+        val boxModifier = if (loadableData.isLoading) {
+            modifier.height(420.dp)
+        } else {
+            modifier
+        }
+        Box(
+            modifier = boxModifier
+                .padding(start = 24.dp, end = 24.dp, top = 32.dp)
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.secondary,
+                            MaterialTheme.colorScheme.primary
+                        )
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                )
+        ) {
+            when (loadableData.loadStatus) {
+                LoadStatus.Loading -> {
+                    Image(
+                        painter = painterResource(
+                            id = if (isSystemInDarkTheme()) R.drawable.ic_loader_dark
+                            else R.drawable.ic_loader_light
+                        ),
+                        contentDescription = null,
+                        modifier = modifier
+                            .height(40.dp)
+                            .width(40.dp)
+                            .align(Alignment.Center)
+                    )
+                }
+
+                LoadStatus.Loaded -> Card(
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    AsyncImage(
+                        model = loadableData.data?.url,
+                        contentDescription = null,
+                        modifier = modifier.fillMaxWidth()
+                    )
+                }
+
+                LoadStatus.Error -> {}
+            }
+
+        }
     }
 }
 

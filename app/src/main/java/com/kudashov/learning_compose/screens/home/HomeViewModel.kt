@@ -1,25 +1,27 @@
 package com.kudashov.learning_compose.screens.home
 
-import androidx.lifecycle.SavedStateHandle
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.kudashov.learning_compose.domain.util.LoadStatus
+import com.kudashov.learning_compose.domain.util.LoadableData
 import com.kudashov.learning_compose.network.home.PhotosRepository
+import com.kudashov.learning_compose.screens.home.ItemCreator.EDITORIAL_ID
+import com.kudashov.learning_compose.screens.home.ItemCreator.RANDOM_PHOTO_ID
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-const val HOME_STATE = "HOME_STATE"
-
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val photosRepository: PhotosRepository
 ) : ViewModel() {
 
-    val state: StateFlow<HomeState> = savedStateHandle.getStateFlow(HOME_STATE, HomeState())
+    var state by mutableStateOf(HomeState())
 
     val photos by lazy {
         photosRepository.getPagedListFlow()
@@ -29,13 +31,13 @@ class HomeViewModel @Inject constructor(
     fun loadTopics() = viewModelScope.launch {
         val topics = photosRepository.getTopicList()
 
-        savedStateHandle[HOME_STATE] = state.value.copy(
+        state = state.copy(
             tabs = ItemCreator.createTopics(topics)
         )
     }
 
     fun onTabClicked(id: String) {
-        val updatedTabs = state.value.tabs.map {
+        val updatedTabs: List<TabItem> = state.tabs.map {
             if (it is TabItem.TextTabItem) {
                 if (id == it.id) it.copy(isSelected = true)
                 else it.copy(isSelected = false)
@@ -44,8 +46,25 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-        savedStateHandle[HOME_STATE] = state.value.copy(
-            tabs = updatedTabs
-        )
+        state = state.copy(tabs = updatedTabs)
+        reactOnTabSelected(state.selectedTopicId)
+    }
+
+    private fun reactOnTabSelected(selectedTabId: String) = when (selectedTabId) {
+        EDITORIAL_ID -> {}
+        RANDOM_PHOTO_ID -> loadRandomPhoto()
+        else -> {
+            // todo
+        }
+    }
+
+    private fun loadRandomPhoto() {
+        viewModelScope.launch {
+            state = state.copy(randomPhoto = LoadableData(null, LoadStatus.Loading))
+
+            state = state.copy(
+                randomPhoto = LoadableData(photosRepository.getRandomPhoto(), LoadStatus.Loaded)
+            )
+        }
     }
 }
