@@ -1,8 +1,8 @@
-package com.kudashov.learning_compose.di
+package com.kudashov.learning_compose.base.di
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import com.kudashov.learning_compose.domain.PhotoItem
+import com.kudashov.learning_compose.base.domain.PhotoItem
 import com.kudashov.learning_compose.network.home.PhotosApi
 import com.kudashov.learning_compose.network.home.PhotosRemotePagerSource
 import com.kudashov.learning_compose.network.home.IMAGE_PAGE_SIZE

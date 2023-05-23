@@ -67,16 +67,16 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
-import com.kudashov.learning_compose.domain.PhotoDetail
-import com.kudashov.learning_compose.domain.PhotoItem
-import com.kudashov.learning_compose.domain.util.LoadStatus
-import com.kudashov.learning_compose.domain.util.LoadableData
-import com.kudashov.learning_compose.navigation.Screen
+import com.kudashov.learning_compose.base.domain.PhotoDetail
+import com.kudashov.learning_compose.base.domain.PhotoItem
+import com.kudashov.learning_compose.base.domain.util.LoadStatus
+import com.kudashov.learning_compose.base.domain.util.LoadableData
+import com.kudashov.learning_compose.base.navigation.Screen
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
-import com.kudashov.learning_compose.ui.style.ProjectTextStyle
-import com.kudashov.learning_compose.ui.theme.Grey
-import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
-import com.kudashov.learning_compose.ui.theme.LightGrey
+import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
+import com.kudashov.learning_compose.base.ui.theme.Grey
+import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.base.ui.theme.LightGrey
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

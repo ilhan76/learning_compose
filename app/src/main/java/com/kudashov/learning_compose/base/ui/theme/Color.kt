@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.ui.theme
+package com.kudashov.learning_compose.base.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

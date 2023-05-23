@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.ui.style
+package com.kudashov.learning_compose.base.ui.style
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -6,10 +6,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.kudashov.learning_compose.R
-import com.kudashov.learning_compose.ui.theme.HintTextColor
-import com.kudashov.learning_compose.ui.theme.LightGreen
-import com.kudashov.learning_compose.ui.theme.LightTextColor
-import com.kudashov.learning_compose.ui.theme.StandardTextColor
+import com.kudashov.learning_compose.base.ui.theme.HintTextColor
+import com.kudashov.learning_compose.base.ui.theme.LightGreen
+import com.kudashov.learning_compose.base.ui.theme.LightTextColor
+import com.kudashov.learning_compose.base.ui.theme.StandardTextColor
 
 object ProjectTextStyle {
     private val BaseText = TextStyle(

@@ -39,10 +39,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
-import com.kudashov.learning_compose.ui.style.ProjectTextStyle
-import com.kudashov.learning_compose.ui.theme.Black
-import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
-import com.kudashov.learning_compose.ui.theme.White
+import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
+import com.kudashov.learning_compose.base.ui.theme.Black
+import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.base.ui.theme.White
 import kotlinx.coroutines.launch
 
 @Composable

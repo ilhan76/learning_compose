@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.kudashov.learning_compose.domain.util.LoadStatus
-import com.kudashov.learning_compose.domain.util.LoadableData
+import com.kudashov.learning_compose.base.domain.util.LoadStatus
+import com.kudashov.learning_compose.base.domain.util.LoadableData
 import com.kudashov.learning_compose.network.home.PhotosRepository
 import com.kudashov.learning_compose.screens.home.ItemCreator.EDITORIAL_ID
 import com.kudashov.learning_compose.screens.home.ItemCreator.RANDOM_PHOTO_ID

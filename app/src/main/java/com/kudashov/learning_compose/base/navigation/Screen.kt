@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.navigation
+package com.kudashov.learning_compose.base.navigation
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")

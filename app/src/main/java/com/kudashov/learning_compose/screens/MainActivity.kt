@@ -7,8 +7,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.kudashov.learning_compose.navigation.Navigation
-import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.base.navigation.Navigation
+import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.domain
+package com.kudashov.learning_compose.base.domain
 
 data class Topic(
     val id: String,

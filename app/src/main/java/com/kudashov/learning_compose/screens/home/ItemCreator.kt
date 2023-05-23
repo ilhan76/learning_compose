@@ -1,6 +1,6 @@
 package com.kudashov.learning_compose.screens.home
 
-import com.kudashov.learning_compose.domain.Topic
+import com.kudashov.learning_compose.base.domain.Topic
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 
 object ItemCreator {
