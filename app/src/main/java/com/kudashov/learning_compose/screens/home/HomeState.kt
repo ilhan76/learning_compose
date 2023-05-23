@@ -9,4 +9,11 @@ import kotlinx.android.parcel.Parcelize
 data class HomeState(
     val photos: List<PhotoItem> = emptyList(),
     val tabs: List<TabItem> = emptyList()
-): Parcelable
+) : Parcelable {
+
+    val selectedTopicId: String = tabs
+        .filterIsInstance<TabItem.TextTabItem>()
+        .find { it.isSelected }
+        ?.id
+        .orEmpty()
+}

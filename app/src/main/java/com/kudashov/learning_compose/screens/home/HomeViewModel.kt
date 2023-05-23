@@ -8,6 +8,7 @@ import com.kudashov.learning_compose.network.home.PhotosRepository
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 const val HOME_STATE = "HOME_STATE"
@@ -20,15 +21,17 @@ class HomeViewModel @Inject constructor(
 
     val state: StateFlow<HomeState> = savedStateHandle.getStateFlow(HOME_STATE, HomeState())
 
-    init {
-        savedStateHandle[HOME_STATE] = state.value.copy(
-            tabs = ItemCreator.getTabItems()
-        )
-    }
-
     val photos by lazy {
         photosRepository.getPagedListFlow()
             .cachedIn(viewModelScope)
+    }
+
+    fun loadTopics() = viewModelScope.launch {
+        val topics = photosRepository.getTopicList()
+
+        savedStateHandle[HOME_STATE] = state.value.copy(
+            tabs = ItemCreator.createTopics(topics)
+        )
     }
 
     fun onTabClicked(id: String) {

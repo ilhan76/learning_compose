@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,6 +81,10 @@ fun HomeScreen(
 ) {
     val state = viewModel.state.collectAsState()
 
+    LaunchedEffect(key1 = Unit) {
+        viewModel.loadTopics()
+    }
+
     Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
         Icon(
             painter = painterResource(id = R.drawable.surf_logo),
@@ -96,11 +101,19 @@ fun HomeScreen(
             onTabClicked = viewModel::onTabClicked
         )
 
-        VerticalStaggeredRoundedGrid(
-            photos = viewModel.photos.collectAsLazyPagingItems(),
-            modifier = modifier,
-            navController = navController
-        )
+        when (state.value.selectedTopicId) {
+            ItemCreator.EDITORIAL_ID -> VerticalStaggeredRoundedGrid(
+                photos = viewModel.photos.collectAsLazyPagingItems(),
+                modifier = modifier,
+                navController = navController
+            )
+            ItemCreator.RANDOM_PHOTO_ID -> {
+                // todo
+            }
+            else -> {
+                // todo
+            }
+        }
     }
 }
 
