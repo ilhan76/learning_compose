@@ -12,13 +12,13 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
@@ -78,6 +78,7 @@ import com.kudashov.learning_compose.ui.theme.Grey
 import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
 import com.kudashov.learning_compose.ui.theme.LightGrey
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -85,41 +86,72 @@ fun HomeScreen(
     navController: NavController
 ) {
     val state = viewModel.state
+    val photos = viewModel.photos.collectAsLazyPagingItems()
+    var isRefreshing by remember { mutableStateOf(false) }
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = {
+            //fixme Исправить на более элегантное решение
+            isRefreshing = true
+            photos.refresh()
+        }
+    )
 
     LaunchedEffect(key1 = Unit) { viewModel.loadTopics() }
 
-    Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
-        Icon(
-            painter = painterResource(id = R.drawable.surf_logo),
-            contentDescription = "Surf Logo",
-            modifier = modifier.padding(start = 32.dp, top = 32.dp),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
+    Box(modifier = modifier.pullRefresh(pullRefreshState)) {
+        LazyVerticalStaggeredGrid(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .background(color = MaterialTheme.colorScheme.primary),
+            columns = StaggeredGridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
+            verticalItemSpacing = 9.dp
+        ) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Column {
+                    Icon(
+                        painter = painterResource(id = R.drawable.surf_logo),
+                        contentDescription = "Surf Logo",
+                        modifier = modifier.padding(top = 32.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                    SearchBar(modifier)
+                    PageList(
+                        state = state,
+                        modifier = modifier,
+                        onTabClicked = viewModel::onTabClicked
+                    )
+                }
+            }
 
-        SearchBar(modifier)
+            when (state.selectedTopicId) {
+                ItemCreator.EDITORIAL_ID -> addVerticalStaggeredRoundedGrid(
+                    photos = photos,
+                    modifier = modifier,
+                    navController = navController,
+                    isRefreshing = isRefreshing,
+                    onRefreshFinished = { isRefreshing = false }
+                )
 
-        PageList(
-            state = state,
-            modifier = modifier,
-            onTabClicked = viewModel::onTabClicked
-        )
+                ItemCreator.RANDOM_PHOTO_ID -> addRandomPhoto(
+                    loadableData = state.randomPhoto,
+                    modifier = modifier
+                )
 
-        when (state.selectedTopicId) {
-            ItemCreator.EDITORIAL_ID -> VerticalStaggeredRoundedGrid(
-                photos = viewModel.photos.collectAsLazyPagingItems(),
-                modifier = modifier,
-                navController = navController
-            )
-
-            ItemCreator.RANDOM_PHOTO_ID -> RandomPhoto(
-                loadableData = state.randomPhoto,
-                modifier = modifier
-            )
-
-            else -> {
-                // todo
+                else -> {
+                    // todo
+                }
             }
         }
+
+        //todo - Поправить расположение индикатора
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = modifier.align(Alignment.Center)
+        )
     }
 }
 
@@ -146,7 +178,7 @@ private fun SearchBar(modifier: Modifier = Modifier) {
         ),
         singleLine = true,
         modifier = modifier
-            .padding(24.dp)
+            .padding(vertical = 24.dp)
             .fillMaxWidth()
             .heightIn(min = 40.dp),
     )
@@ -159,7 +191,7 @@ private fun PageList(
     onTabClicked: (String) -> Unit
 ) {
     LazyRow(
-        modifier = modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
+        modifier = modifier.padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         items(state.tabs) { tabData ->
@@ -182,69 +214,47 @@ private fun PageList(
 }
 
 @OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun VerticalStaggeredRoundedGrid(
+private fun LazyStaggeredGridScope.addVerticalStaggeredRoundedGrid(
     photos: LazyPagingItems<PhotoItem>,
     navController: NavController,
+    isRefreshing: Boolean,
     modifier: Modifier = Modifier,
+    onRefreshFinished: () -> Unit = {}
 ) {
-    var isRefreshing by remember { mutableStateOf(false) }
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing,
-        onRefresh = {
-            //fixme Разобраться, почему не работает
-            isRefreshing = true
-            photos.refresh()
-        }
-    )
-    Box(
-        modifier = modifier
-            .pullRefresh(pullRefreshState)
-            .padding(top = 24.dp, start = 22.dp, end = 22.dp)
-            .fillMaxSize()
-    ) {
-        LazyVerticalStaggeredGrid(
-            modifier = modifier.fillMaxSize(),
-            columns = StaggeredGridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
-            verticalItemSpacing = 9.dp
-        ) {
-            when {
-                photos.loadState.refresh is LoadState.Loading && !isRefreshing -> addShimmers(
-                    modifier
-                )
-
-                photos.loadState.refresh is LoadState.Error -> addErrorPlaceholder(modifier)
-                else -> {
-                    if (photos.loadState.refresh is LoadState.NotLoading) isRefreshing = false
-                    items(
-                        count = photos.itemCount,
-                        key = photos.itemKey(),
-                        contentType = photos.itemContentType()
-                    ) { index ->
-                        val photo = photos[index]
-                        PhotoGridItem(photo, index, modifier.clickable {
-                            photo?.let { navController.navigate("${Screen.Detail.route}/${photo.id}") }
-                        })
-                    }
-                }
-            }
-            if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
-        }
-        PullRefreshIndicator(
-            isRefreshing,
-            pullRefreshState,
-            Modifier.align(Alignment.TopCenter)
+    item(span = StaggeredGridItemSpan.FullLine) {
+        Spacer(
+            modifier = modifier
+                .height(24.dp)
+                .fillMaxWidth()
         )
     }
+    when {
+        photos.loadState.refresh is LoadState.Loading && !isRefreshing ->
+            addShimmers(modifier)
+
+        photos.loadState.refresh is LoadState.Error -> addErrorPlaceholder(modifier)
+        else -> {
+            if (photos.loadState.refresh is LoadState.NotLoading) onRefreshFinished()
+            items(
+                count = photos.itemCount,
+                key = photos.itemKey(),
+                contentType = photos.itemContentType()
+            ) { index ->
+                val photo = photos[index]
+                PhotoGridItem(photo, index, modifier.clickable {
+                    photo?.let { navController.navigate("${Screen.Detail.route}/${photo.id}") }
+                })
+            }
+        }
+    }
+    if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
 }
 
-@Composable
-private fun RandomPhoto(
+private fun LazyStaggeredGridScope.addRandomPhoto(
     loadableData: LoadableData<PhotoDetail>,
     modifier: Modifier = Modifier
-) = LazyColumn {
-    item {
+) {
+    item(span = StaggeredGridItemSpan.FullLine) {
         val boxModifier = if (loadableData.isLoading) {
             modifier.height(420.dp)
         } else {
@@ -332,11 +342,14 @@ private fun TabBarItem(
     modifier: Modifier = Modifier,
     onTabClicked: (String) -> Unit = {},
 ) {
-    Box(
-        if (textTabItem.isSelected) modifier.bottomBorder(
+    val boxModifier = if (textTabItem.isSelected) modifier
+        .bottomBorder(
             color = MaterialTheme.colorScheme.onPrimary,
             lineHeight = with(LocalDensity.current) { 2.dp.toPx() }
-        ) else modifier
+        )
+    else modifier
+    Box(
+        boxModifier
             .clickable {
                 onTabClicked(textTabItem.id)
             }
