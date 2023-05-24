@@ -21,6 +21,5 @@ data class HomeState(
     val selectedTopicId: String = tabs
         .filterIsInstance<TabItem.TextTabItem>()
         .find { it.isSelected }
-        ?.id
-        .orEmpty()
+        ?.id ?: ItemCreator.EDITORIAL_ID
 }

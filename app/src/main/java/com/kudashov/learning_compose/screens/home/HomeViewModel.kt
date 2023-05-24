@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kudashov.learning_compose.base.domain.PhotoItem
 import com.kudashov.learning_compose.base.domain.util.LoadStatus
 import com.kudashov.learning_compose.base.domain.util.LoadableData
-import com.kudashov.learning_compose.base.paging.DefaultPager
+import com.kudashov.learning_compose.base.paging.Pager
 import com.kudashov.learning_compose.base.paging.LoadDataType
+import com.kudashov.learning_compose.base.paging.PagerLoadStatus
 import com.kudashov.learning_compose.network.home.PhotosRepository
 import com.kudashov.learning_compose.screens.home.ItemCreator.EDITORIAL_ID
 import com.kudashov.learning_compose.screens.home.ItemCreator.RANDOM_PHOTO_ID
@@ -17,6 +19,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val IMAGE_PAGE_SIZE = 20
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val photosRepository: PhotosRepository
@@ -24,24 +28,26 @@ class HomeViewModel @Inject constructor(
 
     var state by mutableStateOf(HomeState())
 
-    private val pager = DefaultPager(
+    private val editorialPager = Pager(
         initialKey = state.page,
-        onLoadUpdated = {
-            state = state.copy(loadStatus = it)
+        onLoadUpdated = ::pagerOnLoadUpdated,
+        loadPage = { nextPage ->
+            photosRepository.getPhotos(nextPage, IMAGE_PAGE_SIZE)
         },
-        onRequest = {nextPage ->
-            photosRepository.getPhotos(nextPage, 20)
-        },
-        getNextKey = { state.page + 1 },
-        onError = {
+        getNextKey = ::pagerGetNextKey,
+        onError = ::pagerOnError,
+        onSuccess = ::pagerOnSuccess
+    )
 
+    private val topicPager = Pager(
+        initialKey = state.page,
+        onLoadUpdated = ::pagerOnLoadUpdated,
+        loadPage = { nextPage ->
+            photosRepository.getPhotosByTopics(state.selectedTopicId, nextPage, IMAGE_PAGE_SIZE)
         },
-        onSuccess = { items, newKey ->
-            state = state.copy(
-                photos = state.photos + items,
-                page = newKey
-            )
-        }
+        getNextKey = ::pagerGetNextKey,
+        onError = ::pagerOnError,
+        onSuccess = ::pagerOnSuccess
     )
 
     fun loadTopics() = viewModelScope.launch {
@@ -66,18 +72,16 @@ class HomeViewModel @Inject constructor(
         reactOnTabSelected(state.selectedTopicId)
     }
 
-    private fun reactOnTabSelected(selectedTabId: String) = when (selectedTabId) {
-        EDITORIAL_ID -> loadPhotos(loadDataType = LoadDataType.MainRefresh)
-        RANDOM_PHOTO_ID -> loadRandomPhoto()
-        else -> {
-            // todo
+    fun loadPhotos(loadDataType: LoadDataType = LoadDataType.MainRefresh) {
+        viewModelScope.launch {
+            if (state.selectedTopicId == EDITORIAL_ID) editorialPager.loadItems(loadDataType)
+            else topicPager.loadItems(loadDataType)
         }
     }
 
-    fun loadPhotos(loadDataType: LoadDataType = LoadDataType.MainRefresh) {
-        viewModelScope.launch {
-            pager.loadItems(loadDataType)
-        }
+    private fun reactOnTabSelected(selectedTabId: String) = when (selectedTabId) {
+        RANDOM_PHOTO_ID -> loadRandomPhoto()
+        else -> loadPhotos(LoadDataType.MainRefresh)
     }
 
     private fun loadRandomPhoto() {
@@ -89,4 +93,30 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
+    //region Pager
+    private fun pagerOnLoadUpdated(loadStatus: PagerLoadStatus) {
+        state = state.copy(loadStatus = loadStatus)
+    }
+
+    private fun pagerGetNextKey(photos: List<PhotoItem>) = state.page + 1
+
+    private fun pagerOnError(error: Throwable?) {
+        // todo
+    }
+    private fun pagerOnSuccess(
+        items: List<PhotoItem>,
+        newKey: Int,
+        loadStatus: PagerLoadStatus
+    ) {
+        val photos = when(loadStatus) {
+            PagerLoadStatus.AppendLoading -> state.photos + items
+            else -> items
+        }
+        state = state.copy(
+            photos = photos,
+            page = newKey
+        )
+    }
+    //endregion
 }

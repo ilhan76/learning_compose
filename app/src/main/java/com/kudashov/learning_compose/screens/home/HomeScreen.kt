@@ -123,7 +123,12 @@ fun HomeScreen(
             }
 
             when (state.selectedTopicId) {
-                ItemCreator.EDITORIAL_ID -> addVerticalStaggeredRoundedGrid(
+                ItemCreator.RANDOM_PHOTO_ID -> addRandomPhoto(
+                    loadableData = state.randomPhoto,
+                    modifier = modifier
+                )
+
+                else -> addVerticalStaggeredRoundedGrid(
                     photos = state.photos,
                     pagerLoadStatus = state.loadStatus,
                     modifier = modifier,
@@ -134,15 +139,6 @@ fun HomeScreen(
                         viewModel.loadPhotos(LoadDataType.Append)
                     }
                 )
-
-                ItemCreator.RANDOM_PHOTO_ID -> addRandomPhoto(
-                    loadableData = state.randomPhoto,
-                    modifier = modifier
-                )
-
-                else -> {
-                    // todo
-                }
             }
         }
 

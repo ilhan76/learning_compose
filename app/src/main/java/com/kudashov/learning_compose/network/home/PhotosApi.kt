@@ -18,6 +18,7 @@ interface PhotosApi {
 
     @GET(BaseUrls.PHOTOS_BY_TOPIC)
     suspend fun getPhotosByTopic(
+        @Path("id") id: String,
         @Query("page") page: Int,
         @Query("per_page") photosPerPage: Int
     ): List<PhotoItemDto>

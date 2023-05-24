@@ -8,8 +8,6 @@ import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
 
-const val IMAGE_PAGE_SIZE = 20
-
 @Singleton
 class PhotosRepository @Inject constructor(
     private val photosApi: PhotosApi
@@ -19,6 +17,20 @@ class PhotosRepository @Inject constructor(
         val startingIndex = page * pageSize
         return try {
             val photos = photosApi.getImages(startingIndex, pageSize).transform()
+            Result.success(photos)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getPhotosByTopics(
+        id: String,
+        page: Int,
+        pageSize: Int
+    ): Result<List<PhotoItem>> {
+        val startingIndex = page * pageSize
+        return try {
+            val photos = photosApi.getPhotosByTopic(id, startingIndex, pageSize).transform()
             Result.success(photos)
         } catch (e: Exception) {
             Result.failure(e)
