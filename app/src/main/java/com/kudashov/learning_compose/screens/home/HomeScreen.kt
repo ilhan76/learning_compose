@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -60,11 +61,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.base.domain.PhotoDetail
@@ -72,6 +68,8 @@ import com.kudashov.learning_compose.base.domain.PhotoItem
 import com.kudashov.learning_compose.base.domain.util.LoadStatus
 import com.kudashov.learning_compose.base.domain.util.LoadableData
 import com.kudashov.learning_compose.base.navigation.Screen
+import com.kudashov.learning_compose.base.paging.PagerLoadStatus
+import com.kudashov.learning_compose.base.paging.LoadDataType
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
 import com.kudashov.learning_compose.base.ui.theme.Grey
@@ -86,18 +84,16 @@ fun HomeScreen(
     navController: NavController
 ) {
     val state = viewModel.state
-    val photos = viewModel.photos.collectAsLazyPagingItems()
-    var isRefreshing by remember { mutableStateOf(false) }
+    val isRefreshing = state.loadStatus == PagerLoadStatus.PullRefreshLoading
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
-        onRefresh = {
-            //fixme Исправить на более элегантное решение
-            isRefreshing = true
-            photos.refresh()
-        }
+        onRefresh = { viewModel.loadPhotos(LoadDataType.PullRefresh) }
     )
 
-    LaunchedEffect(key1 = Unit) { viewModel.loadTopics() }
+    LaunchedEffect(key1 = Unit) {
+        viewModel.loadPhotos()
+        viewModel.loadTopics()
+    }
 
     Box(modifier = modifier.pullRefresh(pullRefreshState)) {
         LazyVerticalStaggeredGrid(
@@ -128,11 +124,15 @@ fun HomeScreen(
 
             when (state.selectedTopicId) {
                 ItemCreator.EDITORIAL_ID -> addVerticalStaggeredRoundedGrid(
-                    photos = photos,
+                    photos = state.photos,
+                    pagerLoadStatus = state.loadStatus,
                     modifier = modifier,
-                    navController = navController,
-                    isRefreshing = isRefreshing,
-                    onRefreshFinished = { isRefreshing = false }
+                    onItemClicked = { id ->
+                        navController.navigate("${Screen.Detail.route}/$id")
+                    },
+                    loadNextPage = {
+                        viewModel.loadPhotos(LoadDataType.Append)
+                    }
                 )
 
                 ItemCreator.RANDOM_PHOTO_ID -> addRandomPhoto(
@@ -164,7 +164,7 @@ private fun SearchBar(modifier: Modifier = Modifier) {
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.icon_search),
-                contentDescription = ""
+                contentDescription = null
             )
         },
         placeholder = { Text(text = "Search photo") },
@@ -213,13 +213,12 @@ private fun PageList(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 private fun LazyStaggeredGridScope.addVerticalStaggeredRoundedGrid(
-    photos: LazyPagingItems<PhotoItem>,
-    navController: NavController,
-    isRefreshing: Boolean,
+    photos: List<PhotoItem>,
+    pagerLoadStatus: PagerLoadStatus,
     modifier: Modifier = Modifier,
-    onRefreshFinished: () -> Unit = {}
+    onItemClicked: (String) -> Unit = {},
+    loadNextPage: () -> Unit = {}
 ) {
     item(span = StaggeredGridItemSpan.FullLine) {
         Spacer(
@@ -228,26 +227,25 @@ private fun LazyStaggeredGridScope.addVerticalStaggeredRoundedGrid(
                 .fillMaxWidth()
         )
     }
-    when {
-        photos.loadState.refresh is LoadState.Loading && !isRefreshing ->
-            addShimmers(modifier)
+    when (pagerLoadStatus) {
+        PagerLoadStatus.MainLoading -> addShimmers(modifier)
 
-        photos.loadState.refresh is LoadState.Error -> addErrorPlaceholder(modifier)
+        PagerLoadStatus.Error -> addErrorPlaceholder(modifier)
+
         else -> {
-            if (photos.loadState.refresh is LoadState.NotLoading) onRefreshFinished()
-            items(
-                count = photos.itemCount,
-                key = photos.itemKey(),
-                contentType = photos.itemContentType()
-            ) { index ->
-                val photo = photos[index]
-                PhotoGridItem(photo, index, modifier.clickable {
-                    photo?.let { navController.navigate("${Screen.Detail.route}/${photo.id}") }
-                })
+            itemsIndexed(photos) { index, photo ->
+                if (index == photos.size - 1) loadNextPage()
+                PhotoGridItem(
+                    item = photo,
+                    index = index,
+                    modifier = modifier.clickable {
+                        onItemClicked(photo.id)
+                    }
+                )
             }
         }
     }
-    if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
+    if (pagerLoadStatus == PagerLoadStatus.AppendLoading) addFooterLoader(modifier)
 }
 
 private fun LazyStaggeredGridScope.addRandomPhoto(

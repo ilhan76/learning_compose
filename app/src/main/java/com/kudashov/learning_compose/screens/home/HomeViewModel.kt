@@ -5,9 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
 import com.kudashov.learning_compose.base.domain.util.LoadStatus
 import com.kudashov.learning_compose.base.domain.util.LoadableData
+import com.kudashov.learning_compose.base.paging.DefaultPager
+import com.kudashov.learning_compose.base.paging.LoadDataType
 import com.kudashov.learning_compose.network.home.PhotosRepository
 import com.kudashov.learning_compose.screens.home.ItemCreator.EDITORIAL_ID
 import com.kudashov.learning_compose.screens.home.ItemCreator.RANDOM_PHOTO_ID
@@ -23,10 +24,25 @@ class HomeViewModel @Inject constructor(
 
     var state by mutableStateOf(HomeState())
 
-    val photos by lazy {
-        photosRepository.getPagedListFlow()
-            .cachedIn(viewModelScope)
-    }
+    private val pager = DefaultPager(
+        initialKey = state.page,
+        onLoadUpdated = {
+            state = state.copy(loadStatus = it)
+        },
+        onRequest = {nextPage ->
+            photosRepository.getPhotos(nextPage, 20)
+        },
+        getNextKey = { state.page + 1 },
+        onError = {
+
+        },
+        onSuccess = { items, newKey ->
+            state = state.copy(
+                photos = state.photos + items,
+                page = newKey
+            )
+        }
+    )
 
     fun loadTopics() = viewModelScope.launch {
         val topics = photosRepository.getTopicList()
@@ -51,10 +67,16 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun reactOnTabSelected(selectedTabId: String) = when (selectedTabId) {
-        EDITORIAL_ID -> {}
+        EDITORIAL_ID -> loadPhotos(loadDataType = LoadDataType.MainRefresh)
         RANDOM_PHOTO_ID -> loadRandomPhoto()
         else -> {
             // todo
+        }
+    }
+
+    fun loadPhotos(loadDataType: LoadDataType = LoadDataType.MainRefresh) {
+        viewModelScope.launch {
+            pager.loadItems(loadDataType)
         }
     }
 
