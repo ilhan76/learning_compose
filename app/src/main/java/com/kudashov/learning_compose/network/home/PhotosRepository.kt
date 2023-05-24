@@ -6,7 +6,7 @@ import com.kudashov.learning_compose.base.domain.PhotoDetail
 import com.kudashov.learning_compose.base.domain.PhotoItem
 import com.kudashov.learning_compose.base.domain.Topic
 import com.kudashov.learning_compose.base.domain.util.transform
-import kotlinx.coroutines.flow.Flow
+import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +18,15 @@ class PhotosRepository @Inject constructor(
     private val photosApi: PhotosApi
 ) {
 
-    fun getPagedListFlow(): Flow<PagingData<PhotoItem>> = pager.flow
+    suspend fun getPhotos(page: Int, pageSize: Int): Result<List<PhotoItem>> {
+        val startingIndex = page * pageSize
+        return try {
+            val photos = photosApi.getImages(startingIndex, pageSize).transform()
+            Result.success(photos)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     suspend fun getTopicList(): List<Topic> = photosApi.getTopics().transform()
 
