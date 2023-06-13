@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.navigation
+package com.kudashov.learning_compose.base.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType

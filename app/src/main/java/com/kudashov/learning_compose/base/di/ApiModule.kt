@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose.di
+package com.kudashov.learning_compose.base.di
 
 import com.kudashov.learning_compose.network.home.PhotosApi
 import dagger.Module

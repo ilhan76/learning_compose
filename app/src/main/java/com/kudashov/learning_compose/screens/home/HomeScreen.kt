@@ -5,11 +5,14 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +26,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -36,7 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,49 +61,92 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
-import com.kudashov.learning_compose.domain.PhotoItem
-import com.kudashov.learning_compose.navigation.Screen
+import com.kudashov.learning_compose.base.domain.PhotoDetail
+import com.kudashov.learning_compose.base.domain.PhotoItem
+import com.kudashov.learning_compose.base.domain.util.LoadStatus
+import com.kudashov.learning_compose.base.domain.util.LoadableData
+import com.kudashov.learning_compose.base.navigation.Screen
+import com.kudashov.learning_compose.base.paging.PagerLoadStatus
+import com.kudashov.learning_compose.base.paging.LoadDataType
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
-import com.kudashov.learning_compose.ui.style.ProjectTextStyle
-import com.kudashov.learning_compose.ui.theme.Grey
-import com.kudashov.learning_compose.ui.theme.LearningComposeTheme
-import com.kudashov.learning_compose.ui.theme.LightGrey
+import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
+import com.kudashov.learning_compose.base.ui.theme.Grey
+import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.base.ui.theme.LightGrey
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController
 ) {
-    val state = viewModel.state.collectAsState()
+    val state = viewModel.state
+    val isRefreshing = state.loadStatus == PagerLoadStatus.PullRefreshLoading
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = { viewModel.loadPhotos(LoadDataType.PullRefresh) }
+    )
 
-    Column(modifier.background(color = MaterialTheme.colorScheme.primary)) {
-        Icon(
-            painter = painterResource(id = R.drawable.surf_logo),
-            contentDescription = "Surf Logo",
-            modifier = modifier.padding(start = 32.dp, top = 32.dp),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
+    LaunchedEffect(key1 = Unit) {
+        viewModel.loadPhotos()
+        viewModel.loadTopics()
+    }
 
-        SearchBar(modifier)
+    Box(modifier = modifier.pullRefresh(pullRefreshState)) {
+        LazyVerticalStaggeredGrid(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .background(color = MaterialTheme.colorScheme.primary),
+            columns = StaggeredGridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
+            verticalItemSpacing = 9.dp
+        ) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Column {
+                    Icon(
+                        painter = painterResource(id = R.drawable.surf_logo),
+                        contentDescription = "Surf Logo",
+                        modifier = modifier.padding(top = 32.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                    SearchBar(modifier)
+                    PageList(
+                        state = state,
+                        modifier = modifier,
+                        onTabClicked = viewModel::onTabClicked
+                    )
+                }
+            }
 
-        PageList(
-            state = state.value,
-            modifier = modifier,
-            onTabClicked = viewModel::onTabClicked
-        )
+            when (state.selectedTopicId) {
+                ItemCreator.RANDOM_PHOTO_ID -> addRandomPhoto(
+                    loadableData = state.randomPhoto,
+                    modifier = modifier
+                )
 
-        VerticalStaggeredRoundedGrid(
-            photos = viewModel.photos.collectAsLazyPagingItems(),
-            modifier = modifier,
-            navController = navController
+                else -> addVerticalStaggeredRoundedGrid(
+                    photos = state.photos,
+                    pagerLoadStatus = state.loadStatus,
+                    modifier = modifier,
+                    onItemClicked = { id ->
+                        navController.navigate("${Screen.Detail.route}/$id")
+                    },
+                    loadNextPage = {
+                        viewModel.loadPhotos(LoadDataType.Append)
+                    }
+                )
+            }
+        }
+
+        //todo - Поправить расположение индикатора
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = modifier.align(Alignment.Center)
         )
     }
 }
@@ -113,7 +160,7 @@ private fun SearchBar(modifier: Modifier = Modifier) {
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.icon_search),
-                contentDescription = ""
+                contentDescription = null
             )
         },
         placeholder = { Text(text = "Search photo") },
@@ -127,7 +174,7 @@ private fun SearchBar(modifier: Modifier = Modifier) {
         ),
         singleLine = true,
         modifier = modifier
-            .padding(24.dp)
+            .padding(vertical = 24.dp)
             .fillMaxWidth()
             .heightIn(min = 40.dp),
     )
@@ -140,7 +187,7 @@ private fun PageList(
     onTabClicked: (String) -> Unit
 ) {
     LazyRow(
-        modifier = modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
+        modifier = modifier.padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         items(state.tabs) { tabData ->
@@ -162,61 +209,95 @@ private fun PageList(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun VerticalStaggeredRoundedGrid(
-    photos: LazyPagingItems<PhotoItem>,
-    navController: NavController,
+private fun LazyStaggeredGridScope.addVerticalStaggeredRoundedGrid(
+    photos: List<PhotoItem>,
+    pagerLoadStatus: PagerLoadStatus,
     modifier: Modifier = Modifier,
+    onItemClicked: (String) -> Unit = {},
+    loadNextPage: () -> Unit = {}
 ) {
-    var isRefreshing by remember { mutableStateOf(false) }
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing,
-        onRefresh = {
-            //fixme Разобраться, почему не работает
-            isRefreshing = true
-            photos.refresh()
-        }
-    )
-    Box(
-        modifier = modifier
-            .pullRefresh(pullRefreshState)
-            .padding(top = 24.dp, start = 22.dp, end = 22.dp)
-            .fillMaxSize()
-    ) {
-        LazyVerticalStaggeredGrid(
-            modifier = modifier.fillMaxSize(),
-            columns = StaggeredGridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
-            verticalItemSpacing = 9.dp
-        ) {
-            when {
-                photos.loadState.refresh is LoadState.Loading && !isRefreshing -> addShimmers(
-                    modifier
-                )
-
-                photos.loadState.refresh is LoadState.Error -> addErrorPlaceholder(modifier)
-                else -> {
-                    if (photos.loadState.refresh is LoadState.NotLoading) isRefreshing = false
-                    items(
-                        count = photos.itemCount,
-                        key = photos.itemKey(),
-                        contentType = photos.itemContentType()
-                    ) { index ->
-                        val photo = photos[index]
-                        PhotoGridItem(photo, index, modifier.clickable {
-                            photo?.let { navController.navigate("${Screen.Detail.route}/${photo.id}") }
-                        })
-                    }
-                }
-            }
-            if (photos.loadState.append is LoadState.Loading) addFooterLoader(modifier)
-        }
-        PullRefreshIndicator(
-            isRefreshing,
-            pullRefreshState,
-            Modifier.align(Alignment.TopCenter)
+    item(span = StaggeredGridItemSpan.FullLine) {
+        Spacer(
+            modifier = modifier
+                .height(24.dp)
+                .fillMaxWidth()
         )
+    }
+    when (pagerLoadStatus) {
+        PagerLoadStatus.MainLoading -> addShimmers(modifier)
+
+        PagerLoadStatus.Error -> addErrorPlaceholder(modifier)
+
+        else -> {
+            itemsIndexed(photos) { index, photo ->
+                if (index == photos.size - 1) loadNextPage()
+                PhotoGridItem(
+                    item = photo,
+                    index = index,
+                    modifier = modifier.clickable {
+                        onItemClicked(photo.id)
+                    }
+                )
+            }
+        }
+    }
+    if (pagerLoadStatus == PagerLoadStatus.AppendLoading) addFooterLoader(modifier)
+}
+
+private fun LazyStaggeredGridScope.addRandomPhoto(
+    loadableData: LoadableData<PhotoDetail>,
+    modifier: Modifier = Modifier
+) {
+    item(span = StaggeredGridItemSpan.FullLine) {
+        val boxModifier = if (loadableData.isLoading) {
+            modifier.height(420.dp)
+        } else {
+            modifier
+        }
+        Box(
+            modifier = boxModifier
+                .padding(start = 24.dp, end = 24.dp, top = 32.dp)
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.secondary,
+                            MaterialTheme.colorScheme.primary
+                        )
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                )
+        ) {
+            when (loadableData.loadStatus) {
+                LoadStatus.Loading -> {
+                    Image(
+                        painter = painterResource(
+                            id = if (isSystemInDarkTheme()) R.drawable.ic_loader_dark
+                            else R.drawable.ic_loader_light
+                        ),
+                        contentDescription = null,
+                        modifier = modifier
+                            .height(40.dp)
+                            .width(40.dp)
+                            .align(Alignment.Center)
+                    )
+                }
+
+                LoadStatus.Loaded -> Card(
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    AsyncImage(
+                        model = loadableData.data?.url,
+                        contentDescription = null,
+                        modifier = modifier.fillMaxWidth()
+                    )
+                }
+
+                LoadStatus.Error -> {}
+            }
+
+        }
     }
 }
 
@@ -255,11 +336,14 @@ private fun TabBarItem(
     modifier: Modifier = Modifier,
     onTabClicked: (String) -> Unit = {},
 ) {
-    Box(
-        if (textTabItem.isSelected) modifier.bottomBorder(
+    val boxModifier = if (textTabItem.isSelected) modifier
+        .bottomBorder(
             color = MaterialTheme.colorScheme.onPrimary,
             lineHeight = with(LocalDensity.current) { 2.dp.toPx() }
-        ) else modifier
+        )
+    else modifier
+    Box(
+        boxModifier
             .clickable {
                 onTabClicked(textTabItem.id)
             }

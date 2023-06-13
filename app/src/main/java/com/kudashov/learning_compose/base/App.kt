@@ -1,4 +1,4 @@
-package com.kudashov.learning_compose
+package com.kudashov.learning_compose.base
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
