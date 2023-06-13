@@ -2,6 +2,7 @@ package com.kudashov.learning_compose.network.home
 
 import com.kudashov.learning_compose.base.domain.PhotoDetail
 import com.kudashov.learning_compose.base.domain.PhotoItem
+import com.kudashov.learning_compose.base.domain.PhotoStatistics
 import com.kudashov.learning_compose.base.domain.Topic
 import com.kudashov.learning_compose.base.domain.util.transform
 import java.lang.Exception
@@ -49,4 +50,13 @@ class PhotosRepository @Inject constructor(
     }
 
     suspend fun getPhotoDetail(id: String): PhotoDetail = photosApi.getPhotoDetail(id).transform()
+
+    suspend fun getPhotoStatistics(id: String): Result<PhotoStatistics> {
+     return try {
+         val statistics = photosApi.getPhotoStatistics(id).transform()
+         Result.success(statistics)
+     } catch (e: Exception) {
+         Result.failure(e)
+     }
+    }
 }

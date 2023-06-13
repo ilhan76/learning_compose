@@ -3,6 +3,7 @@ package com.kudashov.learning_compose.network.home
 import com.kudashov.learning_compose.network.BaseUrls
 import com.kudashov.learning_compose.network.home.dto.PhotoDetailDto
 import com.kudashov.learning_compose.network.home.dto.PhotoItemDto
+import com.kudashov.learning_compose.network.home.dto.PhotoStatisticsDto
 import com.kudashov.learning_compose.network.home.dto.TopicDto
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -29,6 +30,9 @@ interface PhotosApi {
     @GET(BaseUrls.RANDOM_PHOTO)
     suspend fun getRandomPhoto() : PhotoDetailDto
 
-    @GET("${BaseUrls.LIST_PHOTOS}/{id}")
+    @GET(BaseUrls.PHOTO_DETAIL)
     suspend fun getPhotoDetail(@Path("id") id: String): PhotoDetailDto
+
+    @GET(BaseUrls.PHOTO_STATISTICS)
+    suspend fun getPhotoStatistics(@Path("id") id: String): PhotoStatisticsDto
 }

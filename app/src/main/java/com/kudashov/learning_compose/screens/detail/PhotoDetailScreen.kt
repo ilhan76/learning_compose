@@ -53,6 +53,7 @@ fun PhotoDetailRoute(
 ) {
     LaunchedEffect(key1 = Unit) {
         viewModel.loadPhotoDetail(photoId)
+        viewModel.loadPhotoStatistics(photoId)
     }
 
     PhotoDetailScreen(
