@@ -88,9 +88,15 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             state = state.copy(randomPhoto = LoadableData(null, LoadStatus.Loading))
 
-            state = state.copy(
-                randomPhoto = LoadableData(photosRepository.getRandomPhoto(), LoadStatus.Loaded)
-            )
+            val result = photosRepository.getRandomPhoto()
+            if (result.isSuccess) {
+                state = state.copy(
+                    randomPhoto = LoadableData(result.getOrNull(), LoadStatus.Loaded)
+                )
+            } else {
+                val e = result.exceptionOrNull()
+                // todo Обработать
+            }
         }
     }
 
@@ -104,6 +110,7 @@ class HomeViewModel @Inject constructor(
     private fun pagerOnError(error: Throwable?) {
         // todo
     }
+
     private fun pagerOnSuccess(
         items: List<PhotoItem>,
         newKey: Int,

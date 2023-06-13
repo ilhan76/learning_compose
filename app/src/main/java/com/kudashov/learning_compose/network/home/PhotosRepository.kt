@@ -39,7 +39,14 @@ class PhotosRepository @Inject constructor(
 
     suspend fun getTopicList(): List<Topic> = photosApi.getTopics().transform()
 
-    suspend fun getRandomPhoto(): PhotoDetail = photosApi.getRandomPhoto().transform()
+    suspend fun getRandomPhoto(): Result<PhotoDetail> {
+        return try {
+            val photos = photosApi.getRandomPhoto().transform()
+            Result.success(photos)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     suspend fun getPhotoDetail(id: String): PhotoDetail = photosApi.getPhotoDetail(id).transform()
 }

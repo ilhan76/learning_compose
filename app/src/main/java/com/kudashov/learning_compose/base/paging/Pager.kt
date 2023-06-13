@@ -1,5 +1,7 @@
 package com.kudashov.learning_compose.base.paging
 
+import kotlinx.coroutines.delay
+
 class Pager<Key, Item>(
     private val initialKey: Key,
     private inline val onLoadUpdated: (PagerLoadStatus) -> Unit,
@@ -23,6 +25,7 @@ class Pager<Key, Item>(
         onLoadUpdated(loadStatus)
 
         val result = loadPage(currentKey)
+        delay(2000)
         val items = result.getOrElse {
             onError(it)
             loadStatus = PagerLoadStatus.Error

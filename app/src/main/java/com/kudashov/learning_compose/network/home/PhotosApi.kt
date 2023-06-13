@@ -24,7 +24,7 @@ interface PhotosApi {
     ): List<PhotoItemDto>
 
     @GET(BaseUrls.TOPICS)
-    suspend fun getTopics() : List<TopicDto>
+    suspend fun getTopics(): List<TopicDto>
 
     @GET(BaseUrls.RANDOM_PHOTO)
     suspend fun getRandomPhoto() : PhotoDetailDto
