@@ -15,12 +15,19 @@ fun Navigation() {
     NavHost(navController = navController, startDestination = Screen.Home.route) {
         composable(route = Screen.Home.route) { HomeScreen(navController = navController) }
         composable(
-            route = "${Screen.Detail.route}/{photoId}",
-            arguments = listOf(navArgument("photoId") { type = NavType.StringType })
+            route = "${Screen.Detail.route}/{topic}/{photoId}",
+            arguments = listOf(
+                navArgument("photoId") { type = NavType.StringType },
+                navArgument("topic") { type = NavType.StringType }
+            )
         ) {
-            it.arguments?.getString("photoId")?.let { id ->
+            val topic = it.arguments?.getString("topic")
+            val photoId = it.arguments?.getString("photoId")
+
+            if (topic != null && photoId != null) {
                 PhotoDetailRoute(
-                    photoId = id,
+                    topic = topic,
+                    photoId = photoId,
                     navController = navController
                 )
             }

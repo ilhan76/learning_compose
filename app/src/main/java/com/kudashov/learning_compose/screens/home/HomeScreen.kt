@@ -133,7 +133,7 @@ fun HomeScreen(
                     pagerLoadStatus = state.loadStatus,
                     modifier = modifier,
                     onItemClicked = { id ->
-                        navController.navigate("${Screen.Detail.route}/$id")
+                        navController.navigate("${Screen.Detail.route}/${viewModel.state.selectedTopic}/$id")
                     },
                     loadNextPage = {
                         viewModel.loadPhotos(LoadDataType.Append)

@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Learning Compose</string>
+
+    <!-- Photo Detail-->
+    <string name="about_photo_btn_text">About photo</string>
+    <string name="share_btn_text">Share</string>
+    
+    <string name="views_title_text">Views</string>
+    <string name="downloads_title_text">Downloads</string>
+    <string name="special_info_title_text">Special information</string>
+    <string name="license_text">Free to use under the Unsplash License</string>
 </resources>
