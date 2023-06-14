@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -132,6 +134,7 @@ fun ScreenContent(
             tint = White,
             modifier = modifier
                 .padding(16.dp)
+                .statusBarsPadding()
                 .clickable {
                     navController.popBackStack()
                 }
@@ -140,6 +143,7 @@ fun ScreenContent(
         Row(
             modifier = modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 24.dp),
             verticalAlignment = Alignment.Bottom
         ) {

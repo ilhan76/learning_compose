@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -110,8 +111,10 @@ fun HomeScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.surf_logo),
                         contentDescription = "Surf Logo",
-                        modifier = modifier.padding(top = 32.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = modifier
+                            .padding(top = 32.dp)
+                            .statusBarsPadding(),
                     )
                     SearchBar(modifier)
                     PageList(
