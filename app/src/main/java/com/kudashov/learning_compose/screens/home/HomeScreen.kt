@@ -73,9 +73,7 @@ import com.kudashov.learning_compose.base.paging.PagerLoadStatus
 import com.kudashov.learning_compose.base.paging.LoadDataType
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
-import com.kudashov.learning_compose.base.ui.theme.Grey
 import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
-import com.kudashov.learning_compose.base.ui.theme.LightGrey
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -408,7 +406,11 @@ private fun Modifier.shimmerEffect(): Modifier = composed {
 
     background(
         brush = Brush.linearGradient(
-            colors = listOf(Grey, LightGrey, Grey),
+            colors = listOf(
+                MaterialTheme.colorScheme.secondary,
+                MaterialTheme.colorScheme.primary,
+                MaterialTheme.colorScheme.secondary
+            ),
             start = Offset(stateOffsetX, 0f),
             end = Offset(stateOffsetX + size.width.toFloat(), size.height.toFloat())
         )
