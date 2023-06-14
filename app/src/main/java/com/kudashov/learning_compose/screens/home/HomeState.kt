@@ -22,4 +22,9 @@ data class HomeState(
         .filterIsInstance<TabItem.TextTabItem>()
         .find { it.isSelected }
         ?.id ?: ItemCreator.EDITORIAL_ID
+
+    val selectedTopic: String = tabs
+        .filterIsInstance<TabItem.TextTabItem>()
+        .find { it.isSelected }
+        ?.title ?: ""
 }

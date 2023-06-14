@@ -25,4 +25,13 @@ class PhotoDetailViewModel @Inject constructor(
             )
         }
     }
+
+    fun loadPhotoStatistics(id: String) {
+        viewModelScope.launch {
+            val result = photosRepository.getPhotoStatistics(id)
+            result.getOrNull()?.let {
+                state = state.copy(photoStatistics = it)
+            }
+        }
+    }
 }

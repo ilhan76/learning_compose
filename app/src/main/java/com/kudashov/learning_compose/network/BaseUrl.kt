@@ -8,4 +8,7 @@ object BaseUrls {
     const val RANDOM_PHOTO = "$LIST_PHOTOS/random"
     const val TOPICS = "/topics"
     const val PHOTOS_BY_TOPIC = "$TOPICS/{id}/photos"
+
+    const val PHOTO_DETAIL = "$LIST_PHOTOS/{id}"
+    const val PHOTO_STATISTICS = "$PHOTO_DETAIL/statistics"
 }

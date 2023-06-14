@@ -5,24 +5,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,15 +48,18 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PhotoDetailRoute(
+    topic: String,
     photoId: String,
     navController: NavController,
     viewModel: PhotoDetailViewModel = hiltViewModel()
 ) {
     LaunchedEffect(key1 = Unit) {
         viewModel.loadPhotoDetail(photoId)
+        viewModel.loadPhotoStatistics(photoId)
     }
 
     PhotoDetailScreen(
+        topic = topic,
         state = viewModel.state,
         navController = navController
     )
@@ -64,6 +68,7 @@ fun PhotoDetailRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoDetailScreen(
+    topic: String,
     state: PhotoDetailState,
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -79,7 +84,11 @@ fun PhotoDetailScreen(
         sheetPeekHeight = 0.dp,
         scaffoldState = scaffoldState,
         sheetContent = {
-            BottomSheetContent(state, modifier) {
+            BottomSheetContent(
+                topic = topic,
+                state = state,
+                modifier = modifier
+            ) {
                 scope.launch { sheetState.hide() }
             }
         }
@@ -88,11 +97,7 @@ fun PhotoDetailScreen(
             state = state,
             navController = navController,
             modifier = modifier,
-            openBottomSheet = {
-                scope.launch {
-                    sheetState.expand()
-                }
-            }
+            openBottomSheet = { scope.launch { sheetState.expand() } }
         )
         if (sheetState.targetValue == SheetValue.Expanded) Box(
             modifier = modifier
@@ -129,6 +134,7 @@ fun ScreenContent(
             tint = White,
             modifier = modifier
                 .padding(16.dp)
+                .statusBarsPadding()
                 .clickable {
                     navController.popBackStack()
                 }
@@ -137,6 +143,7 @@ fun ScreenContent(
         Row(
             modifier = modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 24.dp),
             verticalAlignment = Alignment.Bottom
         ) {
@@ -149,7 +156,7 @@ fun ScreenContent(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
             ) {
                 Text(
-                    text = "About photo",
+                    text = stringResource(id = R.string.about_photo_btn_text),
                     modifier = modifier.background(color = MaterialTheme.colorScheme.tertiary)
                 )
             }
@@ -166,7 +173,7 @@ fun ScreenContent(
                     .weight(1f)
             ) {
                 Text(
-                    text = "Share",
+                    text = stringResource(id = R.string.share_btn_text),
                     style = ProjectTextStyle.RegularText16Green,
                     modifier = modifier.padding(end = 11.dp)
                 )
@@ -177,91 +184,6 @@ fun ScreenContent(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun BottomSheetContent(
-    state: PhotoDetailState,
-    modifier: Modifier = Modifier,
-    onCloseClick: () -> Unit = {}
-) = Box {
-    val photoDetail = state.photoDetail
-
-    Icon(
-        painter = painterResource(id = R.drawable.ic_close),
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.tertiary,
-        modifier = modifier
-            .align(Alignment.TopEnd)
-            .padding(16.dp)
-            .clickable { onCloseClick() }
-    )
-
-    Column(
-        modifier = modifier.padding(top = 56.dp, start = 24.dp, end = 24.dp, bottom = 32.dp)
-    ) {
-        photoDetail?.description?.let {
-            Text(
-                text = it,
-                style = ProjectTextStyle.RegularText24Black,
-                modifier = modifier.fillMaxWidth()
-            )
-        }
-
-        Text(
-            text = "Editorial",
-            style = ProjectTextStyle.RegularText14Green,
-            modifier = modifier.padding(top = 6.dp)
-        )
-        Spacer(modifier = modifier.height(24.dp))
-        Row {
-            Column(modifier = modifier.weight(1f)) {
-                Text(
-                    text = "Views",
-                    style = ProjectTextStyle.RegularText14Light,
-                    modifier = modifier.heightIn(min = 24.dp)
-                )
-                Text(text = "24", modifier = modifier.heightIn(min = 24.dp))
-            }
-            Column(modifier = modifier.weight(1f)) {
-                Text(
-                    text = "Downloads",
-                    style = ProjectTextStyle.RegularText14Light,
-                    modifier = modifier.heightIn(min = 24.dp)
-                )
-                Text(text = "24", modifier = modifier.heightIn(min = 24.dp))
-            }
-        }
-        Spacer(modifier = modifier.height(24.dp))
-        Text(text = "Special information", style = ProjectTextStyle.RegularText14Light)
-
-        Row(modifier = modifier.padding(top = 16.dp)) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_profile_data),
-                contentDescription = null,
-                modifier = modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = 10.dp)
-            )
-            Text(text = "Puerto Rico")
-        }
-        Row(modifier = modifier.padding(top = 8.dp)) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_phone),
-                contentDescription = null,
-                modifier = modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = 10.dp)
-            )
-            Text(text = "Published 10h ago")
-        }
-
-        Text(
-            text = "Free to use under the Unsplash License",
-            style = ProjectTextStyle.RegularText16Light,
-            modifier = modifier.padding(top = 16.dp)
-        )
     }
 }
 
