@@ -19,10 +19,12 @@ val Black = Color(0xFF000000)
 val StandardTextColor = Dark
 val HintTextColor = Dark.copy(alpha = 0.64f)
 val LightTextColor = Dark.copy(alpha = 0.32f)
+val GreenTextColor = SuperLightGreen
 //endregion
 
 //region Text (Black theme)
-val StandardTextColorBlack : Color = White.copy(alpha = 0.8f)
-val HintTextColorBlack = White.copy(alpha = 0.64f)
-val LightTextColorBlack = White.copy(alpha = 0.32f)
+val StandardTextColorDark : Color = White.copy(alpha = 0.8f)
+val HintTextColorDark = White.copy(alpha = 0.64f)
+val LightTextColorDark = White.copy(alpha = 0.32f)
+val GreenTextColorDark = LightGreen
 //endregion

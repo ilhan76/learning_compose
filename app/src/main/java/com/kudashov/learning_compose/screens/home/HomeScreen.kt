@@ -73,7 +73,7 @@ import com.kudashov.learning_compose.base.navigation.Screen
 import com.kudashov.learning_compose.base.paging.PagerLoadStatus
 import com.kudashov.learning_compose.base.paging.LoadDataType
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
-import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
+import com.kudashov.learning_compose.base.ui.theme.text.TextTheme
 import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -353,7 +353,7 @@ private fun TabBarItem(
         if (textTabItem.isNewFeature) {
             Text(
                 text = stringResource(id = R.string.new_feature_hint),
-                style = ProjectTextStyle.RegularText10Hint,
+                style = TextTheme.currentTheme.regular.text10.hint,
                 modifier = modifier.padding(top = 2.dp)
             )
         }
@@ -361,9 +361,9 @@ private fun TabBarItem(
             text = textTabItem.title,
             modifier = modifier.padding(top = 16.dp, bottom = 12.dp),
             style = when {
-                textTabItem.isNewFeature -> ProjectTextStyle.RegularText18Green
-                textTabItem.isSelected -> ProjectTextStyle.RegularText18Black
-                else -> ProjectTextStyle.RegularText18Light
+                textTabItem.isNewFeature -> TextTheme.currentTheme.regular.text14.accent
+                textTabItem.isSelected -> TextTheme.currentTheme.regular.text14.standard
+                else -> TextTheme.currentTheme.regular.text14.light
             }
         )
     }
@@ -385,7 +385,7 @@ private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier = Modi
             Text(
                 modifier = modifier,
                 text = stringResource(id = R.string.error_placeholder_text),
-                style = ProjectTextStyle.RegularText18Black
+                style = TextTheme.currentTheme.regular.text16.standard
             )
         }
     }

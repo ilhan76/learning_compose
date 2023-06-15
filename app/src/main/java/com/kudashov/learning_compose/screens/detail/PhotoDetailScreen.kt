@@ -40,7 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
-import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
+import com.kudashov.learning_compose.base.ui.theme.text.TextTheme
 import com.kudashov.learning_compose.base.ui.theme.Black
 import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
 import com.kudashov.learning_compose.base.ui.theme.White
@@ -174,7 +174,7 @@ fun ScreenContent(
             ) {
                 Text(
                     text = stringResource(id = R.string.share_btn_text),
-                    style = ProjectTextStyle.RegularText16Green,
+                    style = TextTheme.currentTheme.regular.text16.accent,
                     modifier = modifier.padding(end = 11.dp)
                 )
                 Icon(

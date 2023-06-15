@@ -52,7 +52,6 @@ fun LearningComposeTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
         content = content
     )
 }

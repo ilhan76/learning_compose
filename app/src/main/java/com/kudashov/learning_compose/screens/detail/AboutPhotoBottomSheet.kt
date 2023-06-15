@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.base.domain.PhotoDetail
 import com.kudashov.learning_compose.base.domain.PhotoStatistics
-import com.kudashov.learning_compose.base.ui.style.ProjectTextStyle
+import com.kudashov.learning_compose.base.ui.theme.text.TextTheme
 
 @Composable
 fun BottomSheetContent(
@@ -30,7 +31,11 @@ fun BottomSheetContent(
     state: PhotoDetailState,
     modifier: Modifier = Modifier,
     onCloseClick: () -> Unit = {}
-) = Box(modifier.fillMaxWidth()) {
+) = Box(
+    modifier = modifier
+        .fillMaxWidth()
+        .navigationBarsPadding()
+) {
     val photoDetail = state.photoDetail
 
     Icon(
@@ -49,7 +54,7 @@ fun BottomSheetContent(
         photoDetail?.description?.let {
             Text(
                 text = it,
-                style = ProjectTextStyle.RegularText24Black,
+                style = TextTheme.currentTheme.semiBold.text24.standard,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = modifier.fillMaxWidth()
@@ -58,7 +63,7 @@ fun BottomSheetContent(
 
         Text(
             text = topic, // todo
-            style = ProjectTextStyle.RegularText14Green,
+            style = TextTheme.currentTheme.regular.text14.accent,
             modifier = modifier.padding(top = 6.dp)
         )
 
@@ -68,7 +73,7 @@ fun BottomSheetContent(
 
         Text(
             text = stringResource(id = R.string.license_text),
-            style = ProjectTextStyle.RegularText16Light,
+            style = TextTheme.currentTheme.regular.text16.light,
             modifier = modifier.padding(top = 16.dp)
         )
     }
@@ -84,7 +89,7 @@ private fun Statistics(
         Column(modifier = modifier.weight(1f)) {
             Text(
                 text = stringResource(id = R.string.views_title_text),
-                style = ProjectTextStyle.RegularText14Light,
+                style = TextTheme.currentTheme.regular.text14.light,
                 modifier = modifier.heightIn(min = 24.dp)
             )
             Text(
@@ -95,7 +100,7 @@ private fun Statistics(
         Column(modifier = modifier.weight(1f)) {
             Text(
                 text = stringResource(id = R.string.downloads_title_text),
-                style = ProjectTextStyle.RegularText14Light,
+                style = TextTheme.currentTheme.regular.text14.light,
                 modifier = modifier.heightIn(min = 24.dp)
             )
             Text(text = statistics.downloads.toString(), modifier = modifier.heightIn(min = 24.dp))
@@ -113,7 +118,7 @@ private fun SpecialInfo(
 
     Text(
         text = stringResource(id = R.string.special_info_title_text),
-        style = ProjectTextStyle.RegularText14Light
+        style = TextTheme.currentTheme.regular.text14.light
     )
 
     photoDetail.country?.let { country ->
