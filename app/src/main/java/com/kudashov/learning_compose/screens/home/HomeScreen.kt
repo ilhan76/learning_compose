@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -108,7 +109,7 @@ fun HomeScreen(
                 Column {
                     Icon(
                         painter = painterResource(id = R.drawable.surf_logo),
-                        contentDescription = "Surf Logo",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = modifier
                             .padding(top = 32.dp)
@@ -164,7 +165,7 @@ private fun SearchBar(modifier: Modifier = Modifier) {
                 contentDescription = null
             )
         },
-        placeholder = { Text(text = "Search photo") },
+        placeholder = { Text(text = stringResource(id = R.string.search_hint)) },
         shape = RoundedCornerShape(8.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.secondary,
@@ -351,7 +352,7 @@ private fun TabBarItem(
     ) {
         if (textTabItem.isNewFeature) {
             Text(
-                text = "New Feature",
+                text = stringResource(id = R.string.new_feature_hint),
                 style = ProjectTextStyle.RegularText10Hint,
                 modifier = modifier.padding(top = 2.dp)
             )
@@ -383,7 +384,7 @@ private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier = Modi
             )
             Text(
                 modifier = modifier,
-                text = "Упс, что-то пошло не так!",
+                text = stringResource(id = R.string.error_placeholder_text),
                 style = ProjectTextStyle.RegularText18Black
             )
         }

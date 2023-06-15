@@ -1,10 +1,15 @@
 <resources>
     <string name="app_name">Learning Compose</string>
 
-    <!-- Photo Detail-->
+    <!-- Home -->
+    <string name="search_hint">Search photo</string>
+    <string name="new_feature_hint">New Feature</string>
+    <string name="error_placeholder_text">Oops, something went wrong!</string>
+
+    <!-- Photo Detail -->
     <string name="about_photo_btn_text">About photo</string>
     <string name="share_btn_text">Share</string>
-    
+
     <string name="views_title_text">Views</string>
     <string name="downloads_title_text">Downloads</string>
     <string name="special_info_title_text">Special information</string>
