@@ -64,6 +64,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onTabClicked(id: String) {
+        if (state.selectedTopicId == id) return
         val updatedTabs: List<TabItem> = state.tabs.map {
             if (it is TabItem.TextTabItem) {
                 if (id == it.id) it.copy(isSelected = true)
