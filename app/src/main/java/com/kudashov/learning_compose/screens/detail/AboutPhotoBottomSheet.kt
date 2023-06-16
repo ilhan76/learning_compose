@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.kudashov.learning_compose.R
 import com.kudashov.learning_compose.base.domain.PhotoDetail
 import com.kudashov.learning_compose.base.domain.PhotoStatistics
-import com.kudashov.learning_compose.base.ui.theme.text.TextTheme
+import com.kudashov.learning_compose.base.ui.theme.Theme
 
 @Composable
 fun BottomSheetContent(
@@ -41,7 +40,7 @@ fun BottomSheetContent(
     Icon(
         painter = painterResource(id = R.drawable.ic_close),
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.tertiary,
+        tint = Theme.colorScheme.tertiary,
         modifier = modifier
             .align(Alignment.TopEnd)
             .padding(16.dp)
@@ -54,7 +53,7 @@ fun BottomSheetContent(
         photoDetail?.description?.let {
             Text(
                 text = it,
-                style = TextTheme.currentTheme.semiBold.text24.standard,
+                style = Theme.typography.semiBold.text24.standard,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = modifier.fillMaxWidth()
@@ -63,7 +62,7 @@ fun BottomSheetContent(
 
         Text(
             text = topic, // todo
-            style = TextTheme.currentTheme.regular.text14.accent,
+            style = Theme.typography.regular.text14.accent,
             modifier = modifier.padding(top = 6.dp)
         )
 
@@ -73,7 +72,7 @@ fun BottomSheetContent(
 
         Text(
             text = stringResource(id = R.string.license_text),
-            style = TextTheme.currentTheme.regular.text16.light,
+            style = Theme.typography.regular.text16.light,
             modifier = modifier.padding(top = 16.dp)
         )
     }
@@ -89,7 +88,7 @@ private fun Statistics(
         Column(modifier = modifier.weight(1f)) {
             Text(
                 text = stringResource(id = R.string.views_title_text),
-                style = TextTheme.currentTheme.regular.text14.light,
+                style = Theme.typography.regular.text14.light,
                 modifier = modifier.heightIn(min = 24.dp)
             )
             Text(
@@ -100,7 +99,7 @@ private fun Statistics(
         Column(modifier = modifier.weight(1f)) {
             Text(
                 text = stringResource(id = R.string.downloads_title_text),
-                style = TextTheme.currentTheme.regular.text14.light,
+                style = Theme.typography.regular.text14.light,
                 modifier = modifier.heightIn(min = 24.dp)
             )
             Text(text = statistics.downloads.toString(), modifier = modifier.heightIn(min = 24.dp))
@@ -118,7 +117,7 @@ private fun SpecialInfo(
 
     Text(
         text = stringResource(id = R.string.special_info_title_text),
-        style = TextTheme.currentTheme.regular.text14.light
+        style = Theme.typography.regular.text14.light
     )
 
     photoDetail.country?.let { country ->

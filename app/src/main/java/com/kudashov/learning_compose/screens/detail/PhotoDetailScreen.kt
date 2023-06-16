@@ -20,7 +20,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -40,9 +39,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.kudashov.learning_compose.R
-import com.kudashov.learning_compose.base.ui.theme.text.TextTheme
 import com.kudashov.learning_compose.base.ui.theme.Black
 import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.base.ui.theme.Theme
 import com.kudashov.learning_compose.base.ui.theme.White
 import kotlinx.coroutines.launch
 
@@ -153,11 +152,11 @@ fun ScreenContent(
                     .fillMaxWidth()
                     .weight(1f)
                     .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                colors = ButtonDefaults.buttonColors(containerColor = Theme.colorScheme.tertiary)
             ) {
                 Text(
                     text = stringResource(id = R.string.about_photo_btn_text),
-                    modifier = modifier.background(color = MaterialTheme.colorScheme.tertiary)
+                    modifier = modifier.background(color = Theme.colorScheme.tertiary)
                 )
             }
             Spacer(
@@ -170,17 +169,18 @@ fun ScreenContent(
                 modifier = modifier
                     .fillMaxWidth()
                     .height(48.dp)
-                    .weight(1f)
+                    .weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = Theme.colorScheme.primary)
             ) {
                 Text(
                     text = stringResource(id = R.string.share_btn_text),
-                    style = TextTheme.currentTheme.regular.text16.accent,
+                    style = Theme.typography.regular.text16.accent,
                     modifier = modifier.padding(end = 11.dp)
                 )
                 Icon(
                     painter = painterResource(id = R.drawable.ic_share),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary
+                    tint = Theme.colorScheme.tertiary
                 )
             }
         }

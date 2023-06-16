@@ -1,7 +1,5 @@
 package com.kudashov.learning_compose.base.ui.theme.text
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
 import com.kudashov.learning_compose.base.ui.theme.GreenTextColor
 import com.kudashov.learning_compose.base.ui.theme.GreenTextColorDark
 import com.kudashov.learning_compose.base.ui.theme.HintTextColor
@@ -13,7 +11,7 @@ import com.kudashov.learning_compose.base.ui.theme.StandardTextColorDark
 
 object TextTheme {
 
-    object Light : ProjectTextStyle(
+    object Light : ProjectTypography(
         ProjectTextColorPalette(
             standard = StandardTextColor,
             hint = HintTextColor,
@@ -22,7 +20,7 @@ object TextTheme {
         )
     )
 
-    object Dark : ProjectTextStyle(
+    object Dark : ProjectTypography(
         ProjectTextColorPalette(
             standard = StandardTextColorDark,
             hint = HintTextColorDark,
@@ -30,8 +28,4 @@ object TextTheme {
             accent = GreenTextColorDark
         )
     )
-
-    val currentTheme
-        @Composable
-        get() = if (isSystemInDarkTheme()) Dark else Light
 }

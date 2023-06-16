@@ -2,13 +2,17 @@ package com.kudashov.learning_compose.base.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import com.kudashov.learning_compose.base.ui.theme.text.ProjectTypography
+import com.kudashov.learning_compose.base.ui.theme.text.TextTheme
 
 private val DarkColorScheme = darkColorScheme(
     primary = Dark,
@@ -22,17 +26,26 @@ private val LightColorScheme = lightColorScheme(
     secondary = LightGrey,
     tertiary = LightGreen,
     onPrimary = Dark
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
 )
+
+val LocaleTypography = staticCompositionLocalOf<ProjectTypography> {
+    error("No typography provided")
+}
+
+val LocaleColors = staticCompositionLocalOf<ColorScheme> {
+    error("No colors provided")
+}
+
+object Theme {
+
+    val colorScheme: ColorScheme
+        @Composable
+        get() = LocaleColors.current
+
+    val typography: ProjectTypography
+        @Composable
+        get() = LocaleTypography.current
+}
 
 @Composable
 fun LearningComposeTheme(
@@ -50,8 +63,9 @@ fun LearningComposeTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
+    CompositionLocalProvider(
+        LocaleColors provides colorScheme,
+        LocaleTypography provides if (darkTheme) TextTheme.Dark else TextTheme.Light,
         content = content
     )
 }

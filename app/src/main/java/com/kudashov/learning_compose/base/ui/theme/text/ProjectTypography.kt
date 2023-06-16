@@ -12,7 +12,7 @@ private val AmikoFontFamily = FontFamily(
     Font(R.font.amiko_bold, FontWeight.Bold)
 )
 
-abstract class ProjectTextStyle(colorPalette: ProjectTextColorPalette) {
+abstract class ProjectTypography(colorPalette: ProjectTextColorPalette) {
 
     val regular = BaseTextStyle(
         TextStyle(

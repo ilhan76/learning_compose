@@ -36,7 +36,6 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -73,8 +72,8 @@ import com.kudashov.learning_compose.base.navigation.Screen
 import com.kudashov.learning_compose.base.paging.PagerLoadStatus
 import com.kudashov.learning_compose.base.paging.LoadDataType
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
-import com.kudashov.learning_compose.base.ui.theme.text.TextTheme
 import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.base.ui.theme.Theme
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -100,7 +99,7 @@ fun HomeScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .background(color = MaterialTheme.colorScheme.primary),
+                .background(color = Theme.colorScheme.primary),
             columns = StaggeredGridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(9.dp),
             verticalItemSpacing = 9.dp
@@ -110,7 +109,7 @@ fun HomeScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.surf_logo),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = Theme.colorScheme.onPrimary,
                         modifier = modifier
                             .padding(top = 32.dp)
                             .statusBarsPadding(),
@@ -168,8 +167,8 @@ private fun SearchBar(modifier: Modifier = Modifier) {
         placeholder = { Text(text = stringResource(id = R.string.search_hint)) },
         shape = RoundedCornerShape(8.dp),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.secondary,
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+            focusedContainerColor = Theme.colorScheme.secondary,
+            unfocusedContainerColor = Theme.colorScheme.secondary,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent
@@ -204,7 +203,7 @@ private fun PageList(
                     modifier = modifier
                         .height(38.dp)
                         .width(1.dp)
-                        .background(color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.16f))
+                        .background(color = Theme.colorScheme.onPrimary.copy(alpha = 0.16f))
                 )
             }
         }
@@ -263,8 +262,8 @@ private fun LazyStaggeredGridScope.addRandomPhoto(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.secondary,
-                            MaterialTheme.colorScheme.primary
+                            Theme.colorScheme.secondary,
+                            Theme.colorScheme.primary
                         )
                     ),
                     shape = RoundedCornerShape(8.dp),
@@ -340,7 +339,7 @@ private fun TabBarItem(
 ) {
     val boxModifier = if (textTabItem.isSelected) modifier
         .bottomBorder(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = Theme.colorScheme.onPrimary,
             lineHeight = with(LocalDensity.current) { 2.dp.toPx() }
         )
     else modifier
@@ -353,7 +352,7 @@ private fun TabBarItem(
         if (textTabItem.isNewFeature) {
             Text(
                 text = stringResource(id = R.string.new_feature_hint),
-                style = TextTheme.currentTheme.regular.text10.hint,
+                style = Theme.typography.regular.text10.hint,
                 modifier = modifier.padding(top = 2.dp)
             )
         }
@@ -361,9 +360,9 @@ private fun TabBarItem(
             text = textTabItem.title,
             modifier = modifier.padding(top = 16.dp, bottom = 12.dp),
             style = when {
-                textTabItem.isNewFeature -> TextTheme.currentTheme.regular.text14.accent
-                textTabItem.isSelected -> TextTheme.currentTheme.regular.text14.standard
-                else -> TextTheme.currentTheme.regular.text14.light
+                textTabItem.isNewFeature -> Theme.typography.regular.text14.accent
+                textTabItem.isSelected -> Theme.typography.regular.text14.standard
+                else -> Theme.typography.regular.text14.light
             }
         )
     }
@@ -380,12 +379,12 @@ private fun LazyStaggeredGridScope.addErrorPlaceholder(modifier: Modifier = Modi
                 painter = painterResource(id = R.drawable.ic_error),
                 contentDescription = null,
                 modifier = modifier.padding(start = 32.dp, top = 32.dp),
-                tint = MaterialTheme.colorScheme.error
+                tint = Theme.colorScheme.error
             )
             Text(
                 modifier = modifier,
                 text = stringResource(id = R.string.error_placeholder_text),
-                style = TextTheme.currentTheme.regular.text16.standard
+                style = Theme.typography.regular.text16.standard
             )
         }
     }
@@ -408,9 +407,9 @@ private fun Modifier.shimmerEffect(): Modifier = composed {
     background(
         brush = Brush.linearGradient(
             colors = listOf(
-                MaterialTheme.colorScheme.secondary,
-                MaterialTheme.colorScheme.primary,
-                MaterialTheme.colorScheme.secondary
+                Theme.colorScheme.secondary,
+                Theme.colorScheme.primary,
+                Theme.colorScheme.secondary
             ),
             start = Offset(stateOffsetX, 0f),
             end = Offset(stateOffsetX + size.width.toFloat(), size.height.toFloat())
@@ -439,7 +438,7 @@ private fun LazyStaggeredGridScope.addFooterLoader(modifier: Modifier = Modifier
                 modifier = modifier
                     .padding(8.dp)
                     .align(Alignment.Center),
-                color = MaterialTheme.colorScheme.tertiary,
+                color = Theme.colorScheme.tertiary,
             )
         }
     }
