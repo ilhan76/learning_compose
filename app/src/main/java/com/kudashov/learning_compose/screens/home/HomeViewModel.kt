@@ -1,5 +1,6 @@
 package com.kudashov.learning_compose.screens.home
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +13,7 @@ import com.kudashov.learning_compose.base.paging.Pager
 import com.kudashov.learning_compose.base.paging.LoadDataType
 import com.kudashov.learning_compose.base.paging.PagerLoadStatus
 import com.kudashov.learning_compose.network.home.PhotosRepository
+import com.kudashov.learning_compose.screens.ThemeManager
 import com.kudashov.learning_compose.screens.home.ItemCreator.EDITORIAL_ID
 import com.kudashov.learning_compose.screens.home.ItemCreator.RANDOM_PHOTO_ID
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
@@ -23,10 +25,13 @@ const val IMAGE_PAGE_SIZE = 20
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val photosRepository: PhotosRepository
+    private val photosRepository: PhotosRepository,
+    private val themeManager: ThemeManager
 ) : ViewModel() {
 
     var state by mutableStateOf(HomeState())
+
+    val isDarkTheme: MutableState<Boolean> = themeManager.isDarkTheme
 
     private val editorialPager = Pager(
         initialKey = state.page,
@@ -78,6 +83,8 @@ class HomeViewModel @Inject constructor(
             else topicPager.loadItems(loadDataType)
         }
     }
+
+    fun updateTheme(isDark: Boolean) = themeManager.updateThemeValue(isDark)
 
     private fun reactOnTabSelected(selectedTabId: String) = when (selectedTabId) {
         RANDOM_PHOTO_ID -> loadRandomPhoto()

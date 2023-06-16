@@ -18,14 +18,16 @@ private val DarkColorScheme = darkColorScheme(
     primary = Dark,
     secondary = Black,
     tertiary = SuperLightGreen,
-    onPrimary = White
+    onPrimary = White,
+    onPrimaryContainer = Black
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = White,
     secondary = LightGrey,
     tertiary = LightGreen,
-    onPrimary = Dark
+    onPrimary = Dark,
+    onPrimaryContainer = White
 )
 
 val LocaleTypography = staticCompositionLocalOf<ProjectTypography> {

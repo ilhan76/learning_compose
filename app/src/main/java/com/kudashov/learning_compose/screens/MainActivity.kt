@@ -3,19 +3,22 @@ package com.kudashov.learning_compose.screens
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kudashov.learning_compose.base.navigation.Navigation
 import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity: ComponentActivity() {
 
-    private val themeViewModel: ThemeViewModel by viewModels()
+    @Inject
+    lateinit var themeManager: ThemeManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +26,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            val isDark = themeViewModel.isDarkTheme
+            val isDark by remember { themeManager.isDarkTheme }
 
             LearningComposeTheme(darkTheme = isDark) {
                 val systemUiController = rememberSystemUiController()

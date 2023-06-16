@@ -1,22 +1,22 @@
 package com.kudashov.learning_compose.screens
 
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.kudashov.learning_compose.base.storage.ThemeStorage
-import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@HiltViewModel
-class ThemeViewModel @Inject constructor(
+@Singleton
+class ThemeManager @Inject constructor(
     private val themeStorage: ThemeStorage
 ) : ViewModel() {
 
-    var isDarkTheme by mutableStateOf(themeStorage.isDark)
+    var isDarkTheme: MutableState<Boolean> = mutableStateOf(themeStorage.isDark)
+
 
     fun updateThemeValue(isDarkTheme: Boolean) {
         themeStorage.saveTheme(isDarkTheme)
-        this.isDarkTheme = isDarkTheme
+        this.isDarkTheme.value = isDarkTheme
     }
 }

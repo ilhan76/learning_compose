@@ -7,7 +7,7 @@ val LightGreen = Color(0xFF30C150)
 val SuperLightGreen = Color(0xFF42DB63)
 
 val White = Color(0xFFFFFFFF)
-val DarkGrey = Color(0xFF878787)
+val DarkGrey = Color(0xFF989898)
 val Grey = Color(0xFFC4C4C4)
 val LightGrey = Color(0xFFF2F2F2)
 
@@ -28,3 +28,11 @@ val HintTextColorDark = White.copy(alpha = 0.64f)
 val LightTextColorDark = White.copy(alpha = 0.32f)
 val GreenTextColorDark = LightGreen
 //endregion
+
+// region Switch (Light theme)
+
+// endregion
+
+// region Switch (Dark theme)
+
+// endregion

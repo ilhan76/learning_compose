@@ -4,6 +4,8 @@
     <!-- Home -->
     <string name="search_hint">Search photo</string>
     <string name="new_feature_hint">New Feature</string>
+    <string name="light_theme_text">Light</string>
+    <string name="dark_theme_text">Dark</string>
     <string name="error_placeholder_text">Oops, something went wrong!</string>
 
     <!-- Photo Detail -->

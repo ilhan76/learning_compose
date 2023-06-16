@@ -7,16 +7,19 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -36,6 +39,8 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -57,6 +62,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -71,8 +77,12 @@ import com.kudashov.learning_compose.base.domain.util.LoadableData
 import com.kudashov.learning_compose.base.navigation.Screen
 import com.kudashov.learning_compose.base.paging.PagerLoadStatus
 import com.kudashov.learning_compose.base.paging.LoadDataType
+import com.kudashov.learning_compose.base.ui.theme.Dark
+import com.kudashov.learning_compose.base.ui.theme.DarkGrey
 import com.kudashov.learning_compose.screens.home.ui_data.TabItem
 import com.kudashov.learning_compose.base.ui.theme.LearningComposeTheme
+import com.kudashov.learning_compose.base.ui.theme.LightGreen
+import com.kudashov.learning_compose.base.ui.theme.SuperLightGreen
 import com.kudashov.learning_compose.base.ui.theme.Theme
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -88,66 +98,144 @@ fun HomeScreen(
         refreshing = isRefreshing,
         onRefresh = { viewModel.loadPhotos(LoadDataType.PullRefresh) }
     )
+    val isDark = remember { viewModel.isDarkTheme }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         viewModel.loadPhotos()
         viewModel.loadTopics()
     }
 
     Box(modifier = modifier.pullRefresh(pullRefreshState)) {
-        LazyVerticalStaggeredGrid(
+        ScrollableContent(
+            state = state,
+            viewModel = viewModel,
+            onItemClicked = { id ->
+                navController.navigate("${Screen.Detail.route}/${viewModel.state.selectedTopic}/$id")
+            },
             modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .background(color = Theme.colorScheme.primary),
-            columns = StaggeredGridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
-            verticalItemSpacing = 9.dp
-        ) {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                Column {
-                    Icon(
-                        painter = painterResource(id = R.drawable.surf_logo),
-                        contentDescription = null,
-                        tint = Theme.colorScheme.onPrimary,
-                        modifier = modifier
-                            .padding(top = 32.dp)
-                            .statusBarsPadding(),
-                    )
-                    SearchBar(modifier)
-                    PageList(
-                        state = state,
-                        modifier = modifier,
-                        onTabClicked = viewModel::onTabClicked
-                    )
-                }
-            }
+        )
 
-            when (state.selectedTopicId) {
-                ItemCreator.RANDOM_PHOTO_ID -> addRandomPhoto(
-                    loadableData = state.randomPhoto,
-                    modifier = modifier
-                )
-
-                else -> addVerticalStaggeredRoundedGrid(
-                    photos = state.photos,
-                    pagerLoadStatus = state.loadStatus,
-                    modifier = modifier,
-                    onItemClicked = { id ->
-                        navController.navigate("${Screen.Detail.route}/${viewModel.state.selectedTopic}/$id")
-                    },
-                    loadNextPage = {
-                        viewModel.loadPhotos(LoadDataType.Append)
-                    }
-                )
-            }
-        }
+        ThemeSwitch(
+            isDark = isDark.value,
+            modifier = modifier.align(Alignment.BottomCenter),
+            onSwitchClicked = { viewModel.updateTheme(it) }
+        )
 
         //todo - Поправить расположение индикатора
         PullRefreshIndicator(
             refreshing = isRefreshing,
             state = pullRefreshState,
-            modifier = modifier.align(Alignment.Center)
+            modifier = modifier.align(Alignment.Center),
+            contentColor = Theme.colorScheme.tertiary
+        )
+    }
+}
+
+@Composable
+private fun ScrollableContent(
+    state: HomeState,
+    viewModel: HomeViewModel,
+    onItemClicked: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyVerticalStaggeredGrid(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+            .background(color = Theme.colorScheme.primary),
+        columns = StaggeredGridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
+        verticalItemSpacing = 9.dp
+    ) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Column {
+                Icon(
+                    painter = painterResource(id = R.drawable.surf_logo),
+                    contentDescription = null,
+                    tint = Theme.colorScheme.onPrimary,
+                    modifier = modifier
+                        .padding(top = 32.dp)
+                        .statusBarsPadding(),
+                )
+                SearchBar(modifier)
+                PageList(
+                    state = state,
+                    modifier = modifier,
+                    onTabClicked = viewModel::onTabClicked
+                )
+            }
+        }
+
+        when (state.selectedTopicId) {
+            ItemCreator.RANDOM_PHOTO_ID -> addRandomPhoto(
+                loadableData = state.randomPhoto,
+                modifier = modifier
+            )
+
+            else -> addVerticalStaggeredRoundedGrid(
+                photos = state.photos,
+                pagerLoadStatus = state.loadStatus,
+                modifier = modifier,
+                onItemClicked = onItemClicked,
+                loadNextPage = {
+                    viewModel.loadPhotos(LoadDataType.Append)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThemeSwitch(
+    isDark: Boolean,
+    modifier: Modifier = Modifier,
+    onSwitchClicked: (Boolean) -> Unit,
+) = Box(modifier = modifier.padding(bottom = 24.dp)) {
+    val selectedTextStyle = Theme.typography.regular.text16.standard
+    val notSelectedTextStyle = Theme.typography.regular.text16.light
+
+    Row(
+        modifier = modifier
+            .navigationBarsPadding()
+            .height(50.dp)
+            .border(
+                width = 1.dp,
+                shape = RoundedCornerShape(8.dp),
+                color = Theme.colorScheme.secondary
+            )
+            .background(
+                color = Theme.colorScheme.onPrimaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = stringResource(id = R.string.light_theme_text),
+            style = if (!isDark) selectedTextStyle else notSelectedTextStyle,
+            modifier = modifier
+                .width(75.dp)
+                .padding(horizontal = 5.dp)
+        )
+        Switch(
+            checked = isDark,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = DarkGrey,
+                checkedTrackAlpha = 1f,
+                checkedTrackColor = Dark,
+                uncheckedThumbColor = LightGreen,
+                uncheckedTrackColor = SuperLightGreen,
+                uncheckedTrackAlpha = 0.38f
+            ),
+            onCheckedChange = onSwitchClicked
+        )
+        Text(
+            textAlign = TextAlign.Center,
+            text = stringResource(id = R.string.dark_theme_text),
+            style = if (isDark) selectedTextStyle else notSelectedTextStyle,
+            modifier = modifier
+                .width(75.dp)
+                .padding(horizontal = 5.dp)
         )
     }
 }
