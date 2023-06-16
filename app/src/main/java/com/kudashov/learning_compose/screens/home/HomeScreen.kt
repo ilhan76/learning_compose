@@ -121,11 +121,14 @@ fun HomeScreen(
             onSwitchClicked = { viewModel.updateTheme(it) }
         )
 
-        //todo - Поправить расположение индикатора
+        //fixme - Найти более красивое решение
         PullRefreshIndicator(
             refreshing = isRefreshing,
             state = pullRefreshState,
-            modifier = modifier.align(Alignment.Center),
+            modifier = modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .padding(top = 250.dp),
             contentColor = Theme.colorScheme.tertiary
         )
     }
