@@ -1,5 +1,6 @@
 package com.kudashov.learning_compose.screens.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,8 +35,10 @@ fun BottomSheetContent(
     modifier = modifier
         .fillMaxWidth()
         .navigationBarsPadding()
+        .background(color = Theme.colorScheme.primary)
 ) {
     val photoDetail = state.photoDetail
+    val photoStatistics = state.photoStatistics
 
     Icon(
         painter = painterResource(id = R.drawable.ic_close),
@@ -47,9 +50,7 @@ fun BottomSheetContent(
             .clickable { onCloseClick() }
     )
 
-    Column(
-        modifier = modifier.padding(top = 56.dp, start = 24.dp, end = 24.dp, bottom = 32.dp)
-    ) {
+    Column(modifier = modifier.padding(top = 56.dp, start = 24.dp, end = 24.dp, bottom = 32.dp)) {
         photoDetail?.description?.let {
             Text(
                 text = it,
@@ -61,12 +62,12 @@ fun BottomSheetContent(
         }
 
         Text(
-            text = topic, // todo
+            text = topic,
             style = Theme.typography.regular.text14.accent,
             modifier = modifier.padding(top = 6.dp)
         )
 
-        state.photoStatistics?.let { Statistics(statistics = it, modifier = modifier) }
+        photoStatistics?.let { Statistics(statistics = it, modifier = modifier) }
 
         photoDetail?.let { SpecialInfo(photoDetail = photoDetail, modifier = modifier) }
 
@@ -129,7 +130,7 @@ private fun SpecialInfo(
                     .align(Alignment.CenterVertically)
                     .padding(end = 10.dp)
             )
-            Text(text = country)
+            Text(text = country, style = Theme.typography.regular.text16.standard)
         }
     }
     Row(modifier = modifier.padding(top = 8.dp)) {
@@ -140,10 +141,13 @@ private fun SpecialInfo(
                 .align(Alignment.CenterVertically)
                 .padding(end = 10.dp)
         )
-        if (hoursFromCreated < 24) {
-            Text(text = "Published ${hoursFromCreated}h ago")
-        } else {
-            Text(text = "Published on ${photoDetail.createdAtFormatted}")
-        }
+        Text(
+            text = if (hoursFromCreated < 24) {
+                "Published ${hoursFromCreated}h ago"
+            } else {
+                "Published on ${photoDetail.createdAtFormatted}"
+            },
+            style = Theme.typography.regular.text16.standard
+        )
     }
 }

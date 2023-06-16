@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -124,7 +126,9 @@ fun ScreenContent(
             model = state.photoDetail?.url,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
+                .background(color = Theme.colorScheme.primary)
         )
 
         Icon(
@@ -139,6 +143,7 @@ fun ScreenContent(
                 }
         )
 
+        val buttonShape = RoundedCornerShape(16.dp)
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -148,15 +153,17 @@ fun ScreenContent(
         ) {
             Button(
                 onClick = { openBottomSheet() },
+                colors = ButtonDefaults.buttonColors(containerColor = Theme.colorScheme.tertiary),
+                shape = buttonShape,
                 modifier = modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Theme.colorScheme.tertiary)
+                    .height(48.dp)
+                    .shadow(16.dp, buttonShape)
             ) {
                 Text(
                     text = stringResource(id = R.string.about_photo_btn_text),
-                    modifier = modifier.background(color = Theme.colorScheme.tertiary)
+                    style = Theme.typography.semiBold.text16.white
                 )
             }
             Spacer(
@@ -166,15 +173,17 @@ fun ScreenContent(
             )
             Button(
                 onClick = { /*TODO*/ },
+                colors = ButtonDefaults.buttonColors(containerColor = Theme.colorScheme.primary),
+                shape = buttonShape,
                 modifier = modifier
                     .fillMaxWidth()
                     .height(48.dp)
-                    .weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Theme.colorScheme.primary)
+                    .weight(1f)
+                    .shadow(16.dp, buttonShape)
             ) {
                 Text(
                     text = stringResource(id = R.string.share_btn_text),
-                    style = Theme.typography.regular.text16.accent,
+                    style = Theme.typography.semiBold.text16.accent,
                     modifier = modifier.padding(end = 11.dp)
                 )
                 Icon(
@@ -194,6 +203,5 @@ fun ScreenContent(
 )
 @Composable
 fun TestPreview() {
-    LearningComposeTheme {
-    }
+    LearningComposeTheme {}
 }

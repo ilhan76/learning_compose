@@ -10,4 +10,5 @@ class ColoredTextStyle(
     val hint = textStyle.copy(color = colorPalette.hint)
     val light = textStyle.copy(color = colorPalette.light)
     val accent = textStyle.copy(color = colorPalette.accent)
+    val white = textStyle.copy(color = colorPalette.white)
 }
