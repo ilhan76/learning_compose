@@ -84,6 +84,7 @@ fun PhotoDetailScreen(
         sheetDragHandle = null,
         sheetPeekHeight = 0.dp,
         scaffoldState = scaffoldState,
+        modifier = modifier.background(color = Theme.colorScheme.tertiary),
         sheetContent = {
             BottomSheetContent(
                 topic = topic,

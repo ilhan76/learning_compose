@@ -35,7 +35,7 @@ fun BottomSheetContent(
     modifier = modifier
         .fillMaxWidth()
         .navigationBarsPadding()
-        .background(color = Theme.colorScheme.primary)
+        .background(color = Theme.colorScheme.tertiary)
 ) {
     val photoDetail = state.photoDetail
     val photoStatistics = state.photoStatistics

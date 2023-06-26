@@ -25,7 +25,6 @@ class Pager<Key, Item>(
         onLoadUpdated(loadStatus)
 
         val result = loadPage(currentKey)
-        delay(2000)
         val items = result.getOrElse {
             onError(it)
             loadStatus = PagerLoadStatus.Error
